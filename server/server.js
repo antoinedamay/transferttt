@@ -165,6 +165,9 @@ app.post("/api/upload", (req, res) => {
         expiresInDays = parsed;
       }
     }
+    if (name === "customSlug") {
+      req.customSlug = value;
+    }
   });
 
   busboy.on("error", (err) => {
@@ -175,6 +178,12 @@ app.post("/api/upload", (req, res) => {
   busboy.on("finish", async () => {
     if (!tempPath) {
       res.status(400).json({ error: "No file" });
+      return;
+    }
+
+    if (req.customSlug && !(UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN)) {
+      res.status(400).json({ error: "Liens personnalisés indisponibles (configurer Upstash)." });
+      fs.unlink(tempPath, () => {});
       return;
     }
 
@@ -206,7 +215,24 @@ app.post("/api/upload", (req, res) => {
 
         if (UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN) {
           let shortCode = null;
-          for (let i = 0; i < 5; i++) {
+          const customRaw = req.customSlug ? String(req.customSlug) : "";
+          const customSlug = customRaw.trim();
+          if (customSlug) {
+            const valid = /^[A-Za-z0-9_-]{3,32}$/.test(customSlug);
+            if (!valid) {
+              res.status(400).json({ error: "Nom de lien invalide (3-32, lettres/chiffres/-/_)." });
+              fs.unlink(tempPath, () => {});
+              return;
+            }
+            const exists = await kvGet(customSlug);
+            if (exists) {
+              res.status(409).json({ error: "Ce nom de lien est déjà pris." });
+              fs.unlink(tempPath, () => {});
+              return;
+            }
+            shortCode = customSlug;
+          }
+          for (let i = 0; i < 5 && !shortCode; i++) {
             const candidate = generateShortCode(SHORT_CODE_LEN);
             const exists = await kvGet(candidate);
             if (!exists) {

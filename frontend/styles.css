@@ -93,6 +93,27 @@ body {
   padding: 8px 12px;
 }
 
+.options input {
+  background: #0f1220;
+  color: var(--text);
+  border: 1px solid #2f354f;
+  border-radius: 10px;
+  padding: 8px 12px;
+  width: 220px;
+}
+
+.slug-help {
+  margin-top: -8px;
+  margin-bottom: 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.slug-help span {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .dropzone {
   border: 2px dashed #3a405c;
   border-radius: 18px;

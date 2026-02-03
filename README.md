@@ -44,6 +44,10 @@ Ajouter ces variables d'environnement sur Render :
 
 Si Upstash n'est pas configuré, le backend génère des liens longs (base64).
 
+### Liens personnalisés
+Si Upstash est configuré, l'utilisateur peut saisir un **nom de lien** (slug)
+dans l'interface. Le backend refusera si le nom est déjà pris ou invalide.
+
 ## DNS OVH (pour le sous-domaine)
 - Créer un **CNAME** :
   - `transfert` -> `<ton-username>.github.io`

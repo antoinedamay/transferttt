@@ -9,5 +9,6 @@ window.TRANSFER_UI = window.TRANSFER_UI || {
   title: "Transfert",
   subtitle: "Envoi de fichiers simple, rapide, propre.",
   meta: "Max 10 Go • Stockage Mega",
-  accent: "#ffb000"
+  accent: "#ffb000",
+  publicBase: "https://transfert.antoinedamay.fr"
 };

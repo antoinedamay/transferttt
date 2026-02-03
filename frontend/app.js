@@ -2,6 +2,8 @@ const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
 const expirySelect = document.getElementById("expiry");
 const uploadView = document.getElementById("uploadView");
+const customSlugInput = document.getElementById("customSlug");
+const slugPreview = document.getElementById("slugPreview");
 const uploadBox = document.getElementById("upload");
 const fileNameEl = document.getElementById("fileName");
 const fileSizeEl = document.getElementById("fileSize");
@@ -37,6 +39,12 @@ function applyBranding() {
   if (ui.accent) {
     document.documentElement.style.setProperty("--accent", ui.accent);
   }
+}
+
+function getPublicBase() {
+  const ui = window.TRANSFER_UI || {};
+  const base = ui.publicBase || `${window.location.origin}`;
+  return base.endsWith("/") ? base.slice(0, -1) : base;
 }
 
 function formatBytes(bytes) {
@@ -90,6 +98,20 @@ function showError(message) {
   errorBox.hidden = false;
 }
 
+function normalizeSlug(value) {
+  return (value || "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
+function updateSlugPreview() {
+  if (!customSlugInput || !slugPreview) return;
+  const normalized = normalizeSlug(customSlugInput.value || "monfichier");
+  const base = getPublicBase();
+  slugPreview.textContent = `${base}/${normalized}`;
+}
+
 function getTokenFromPath() {
   const parts = window.location.pathname.split("/").filter(Boolean);
   if (!parts.length) return null;
@@ -97,7 +119,7 @@ function getTokenFromPath() {
   if (!last || last === "index.html" || last === "404.html") return null;
   if (last === "frontend") return null;
   if (last.includes(".")) return null;
-  if (last.length < 6) return null;
+  if (last.length < 3) return null;
   return last;
 }
 
@@ -171,9 +193,13 @@ function handleFile(file) {
   fileSizeEl.textContent = formatBytes(file.size);
 
   const expiresInDays = parseInt(expirySelect.value, 10);
+  const customSlug = normalizeSlug(customSlugInput ? customSlugInput.value : "");
   const formData = new FormData();
   formData.append("file", file);
   formData.append("expiresInDays", String(expiresInDays));
+  if (customSlug) {
+    formData.append("customSlug", customSlug);
+  }
 
   const xhr = new XMLHttpRequest();
   xhr.open("POST", `${API_BASE}/api/upload`);
@@ -195,7 +221,16 @@ function handleFile(file) {
         expiryNote.textContent = `Lien valide jusqu'au ${date.toLocaleDateString("fr-FR")}.`;
       }
     } else {
-      showError("Erreur pendant l'upload.");
+      try {
+        const data = JSON.parse(xhr.responseText || "{}");
+        if (data && data.error) {
+          showError(data.error);
+        } else {
+          showError("Erreur pendant l'upload.");
+        }
+      } catch (err) {
+        showError("Erreur pendant l'upload.");
+      }
     }
   });
   xhr.addEventListener("error", () => {
@@ -222,6 +257,11 @@ newBtn.addEventListener("click", () => {
   fileInput.value = "";
   resetUI();
 });
+
+if (customSlugInput) {
+  customSlugInput.addEventListener("input", updateSlugPreview);
+  updateSlugPreview();
+}
 
 fileInput.addEventListener("change", (event) => {
   handleFile(event.target.files[0]);
