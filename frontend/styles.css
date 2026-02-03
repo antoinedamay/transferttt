@@ -225,6 +225,46 @@ body {
   font-size: 13px;
 }
 
+.download {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid #2f354f;
+  background: rgba(11, 14, 22, 0.6);
+}
+
+.download-title {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.download-name {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.download-size,
+.download-expiry,
+.download-remaining {
+  color: var(--muted);
+}
+
+.download-btn {
+  margin-top: 8px;
+  background: var(--accent);
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.download-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .error {
   margin-top: 20px;
   color: var(--danger);

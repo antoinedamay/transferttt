@@ -160,6 +160,32 @@ app.post("/api/upload", (req, res) => {
   req.pipe(busboy);
 });
 
+app.get("/api/info/:token", async (req, res) => {
+  try {
+    const payload = base64UrlDecode(req.params.token);
+    const link = payload.link;
+    const exp = payload.exp ? new Date(payload.exp) : null;
+    if (!link) {
+      res.status(400).json({ error: "Invalid token" });
+      return;
+    }
+    if (exp && Number.isFinite(exp.getTime()) && Date.now() > exp.getTime()) {
+      res.status(410).json({ error: "Expired" });
+      return;
+    }
+    const file = File.fromURL(link);
+    await file.loadAttributes();
+    res.json({
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      expiresAt: exp ? exp.toISOString() : null
+    });
+  } catch (err) {
+    res.status(400).json({ error: "Invalid link" });
+  }
+});
+
 async function handleDownload(token, res) {
   try {
     const payload = base64UrlDecode(token);

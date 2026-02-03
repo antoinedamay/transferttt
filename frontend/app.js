@@ -1,6 +1,7 @@
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
 const expirySelect = document.getElementById("expiry");
+const uploadView = document.getElementById("uploadView");
 const uploadBox = document.getElementById("upload");
 const fileNameEl = document.getElementById("fileName");
 const fileSizeEl = document.getElementById("fileSize");
@@ -13,17 +14,29 @@ const openBtn = document.getElementById("openBtn");
 const newBtn = document.getElementById("newBtn");
 const expiryNote = document.getElementById("expiryNote");
 const errorBox = document.getElementById("error");
+const downloadView = document.getElementById("downloadView");
+const downloadName = document.getElementById("downloadName");
+const downloadSize = document.getElementById("downloadSize");
+const downloadExpiry = document.getElementById("downloadExpiry");
+const downloadRemaining = document.getElementById("downloadRemaining");
+const downloadBtn = document.getElementById("downloadBtn");
 
 const API_BASE = window.TRANSFER_API_BASE;
 const MAX_BYTES = 10 * 1024 * 1024 * 1024;
 
-function maybeRedirectFromToken() {
-  const parts = window.location.pathname.split("/").filter(Boolean);
-  const last = parts[parts.length - 1];
-  if (!last || last.includes(".")) return;
-  if (last === "frontend" || last === "index.html") return;
-  if (last.length < 16) return;
-  window.location.href = `${API_BASE}/dl/${last}`;
+function applyBranding() {
+  const ui = window.TRANSFER_UI || {};
+  const logo = document.getElementById("brandLogo");
+  const title = document.getElementById("brandTitle");
+  const subtitle = document.getElementById("brandSubtitle");
+  const meta = document.getElementById("brandMeta");
+  if (ui.logo && logo) logo.textContent = ui.logo;
+  if (ui.title && title) title.textContent = ui.title;
+  if (ui.subtitle && subtitle) subtitle.textContent = ui.subtitle;
+  if (ui.meta && meta) meta.textContent = ui.meta;
+  if (ui.accent) {
+    document.documentElement.style.setProperty("--accent", ui.accent);
+  }
 }
 
 function formatBytes(bytes) {
@@ -37,6 +50,19 @@ function formatBytes(bytes) {
   return `${value.toFixed(value < 10 && idx > 0 ? 1 : 0)} ${units[idx]}`;
 }
 
+function formatRemaining(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  if (days > 0) {
+    return `${days} jour${days > 1 ? "s" : ""} restant${days > 1 ? "s" : ""}`;
+  }
+  if (hours > 0) {
+    return `${hours} h restante${hours > 1 ? "s" : ""}`;
+  }
+  return "Moins d'1h restante";
+}
+
 function resetUI() {
   uploadBox.hidden = true;
   resultBox.hidden = true;
@@ -44,11 +70,63 @@ function resetUI() {
   progressBar.style.width = "0%";
   uploadStatus.textContent = "En attente...";
   expiryNote.textContent = "Le lien reste valide tant que le fichier existe sur Mega.";
+  if (downloadView) downloadView.hidden = true;
+  if (uploadView) uploadView.hidden = false;
 }
 
 function showError(message) {
   errorBox.textContent = message;
   errorBox.hidden = false;
+}
+
+function getTokenFromPath() {
+  const parts = window.location.pathname.split("/").filter(Boolean);
+  if (!parts.length) return null;
+  const last = parts[parts.length - 1];
+  if (!last || last === "index.html" || last === "404.html") return null;
+  if (last === "frontend") return null;
+  if (last.includes(".")) return null;
+  if (last.length < 16) return null;
+  return last;
+}
+
+async function showDownloadView(token) {
+  resetUI();
+  if (uploadView) uploadView.hidden = true;
+  if (downloadView) downloadView.hidden = false;
+  downloadBtn.disabled = true;
+  downloadBtn.textContent = "Chargement...";
+  downloadName.textContent = "Fichier";
+  downloadSize.textContent = "";
+  downloadExpiry.textContent = "";
+  downloadRemaining.textContent = "";
+
+  try {
+    const res = await fetch(`${API_BASE}/api/info/${token}`);
+    if (res.status === 410) {
+      downloadRemaining.textContent = "Lien expiré.";
+      downloadBtn.textContent = "Lien expiré";
+      return;
+    }
+    if (!res.ok) throw new Error("invalid");
+    const data = await res.json();
+    downloadName.textContent = data.name || "Fichier";
+    if (data.size != null) {
+      downloadSize.textContent = formatBytes(data.size);
+    }
+    if (data.expiresAt) {
+      const expDate = new Date(data.expiresAt);
+      downloadExpiry.textContent = `Expire le ${expDate.toLocaleDateString("fr-FR")}.`;
+      downloadRemaining.textContent = formatRemaining(expDate.getTime() - Date.now());
+    }
+    downloadBtn.textContent = "Télécharger";
+    downloadBtn.disabled = false;
+    downloadBtn.onclick = () => {
+      window.location.href = `${API_BASE}/dl/${token}`;
+    };
+  } catch (err) {
+    showError("Lien invalide ou temporairement indisponible.");
+  }
 }
 
 function handleFile(file) {
@@ -137,5 +215,10 @@ dropzone.addEventListener("drop", (event) => {
   handleFile(event.dataTransfer.files[0]);
 });
 
-maybeRedirectFromToken();
-resetUI();
+applyBranding();
+const token = getTokenFromPath();
+if (token) {
+  showDownloadView(token);
+} else {
+  resetUI();
+}
