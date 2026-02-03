@@ -1,0 +1,202 @@
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
+const express = require("express");
+const fetch = require("node-fetch");
+const AbortController = require("abort-controller");
+const cors = require("cors");
+const Busboy = require("busboy");
+const { Storage, File } = require("megajs");
+const crypto = require("crypto");
+require("dotenv").config();
+
+if (!globalThis.fetch) {
+  globalThis.fetch = fetch;
+}
+if (!globalThis.AbortController) {
+  globalThis.AbortController = AbortController;
+}
+if (!globalThis.crypto) {
+  globalThis.crypto = {};
+}
+if (!globalThis.crypto.getRandomValues) {
+  globalThis.crypto.getRandomValues = (typedArray) => crypto.randomFillSync(typedArray);
+}
+
+const app = express();
+
+const PORT = process.env.PORT || 5050;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || BASE_URL;
+const MAX_BYTES = 10 * 1024 * 1024 * 1024;
+const ALLOWED_EXPIRY_DAYS = [1, 7, 30, 90];
+
+let storagePromise = null;
+
+function getStorage() {
+  if (!storagePromise) {
+    const storage = new Storage({
+      email: process.env.MEGA_EMAIL,
+      password: process.env.MEGA_PASSWORD,
+      keepalive: true
+    });
+    storagePromise = storage.ready.then(() => storage);
+  }
+  return storagePromise;
+}
+
+function base64UrlEncode(input) {
+  return Buffer.from(JSON.stringify(input))
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function base64UrlDecode(token) {
+  const pad = token.length % 4 === 0 ? "" : "=".repeat(4 - (token.length % 4));
+  const json = Buffer.from(token.replace(/-/g, "+").replace(/_/g, "/") + pad, "base64").toString("utf8");
+  return JSON.parse(json);
+}
+
+function sanitizeFilename(name) {
+  return name.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+app.use(cors());
+
+app.get("/api/health", (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() });
+});
+
+app.post("/api/upload", (req, res) => {
+  if (!process.env.MEGA_EMAIL || !process.env.MEGA_PASSWORD) {
+    res.status(500).json({ error: "MEGA credentials missing" });
+    return;
+  }
+
+  const busboy = Busboy({
+    headers: req.headers,
+    limits: { fileSize: MAX_BYTES }
+  });
+
+  let tempPath = null;
+  let originalName = null;
+  let writeStream = null;
+  let expiresInDays = 30;
+
+  busboy.on("file", (name, file, info) => {
+    originalName = info.filename || `file-${Date.now()}`;
+    const safeName = sanitizeFilename(originalName);
+    const rand = crypto.randomBytes(8).toString("hex");
+    tempPath = path.join(os.tmpdir(), `${Date.now()}-${rand}-${safeName}`);
+    writeStream = fs.createWriteStream(tempPath);
+    file.pipe(writeStream);
+
+    file.on("limit", () => {
+      res.status(413).json({ error: "File too large" });
+    });
+  });
+
+  busboy.on("field", (name, value) => {
+    if (name === "expiresInDays") {
+      const parsed = parseInt(value, 10);
+      if (ALLOWED_EXPIRY_DAYS.includes(parsed)) {
+        expiresInDays = parsed;
+      }
+    }
+  });
+
+  busboy.on("error", (err) => {
+    console.error("Busboy error:", err);
+    res.status(500).json({ error: "Upload failed" });
+  });
+
+  busboy.on("finish", async () => {
+    if (!tempPath) {
+      res.status(400).json({ error: "No file" });
+      return;
+    }
+
+    try {
+      const stats = fs.statSync(tempPath);
+      let storage;
+      try {
+        storage = await getStorage();
+      } catch (err) {
+        console.error("Mega auth error:", err);
+        res.status(500).json({ error: "Mega auth failed" });
+        fs.unlink(tempPath, () => {});
+        return;
+      }
+      const uploadStream = fs.createReadStream(tempPath);
+      const upload = storage.upload({ name: originalName, size: stats.size }, uploadStream);
+
+      upload.on("error", () => {
+        console.error("Mega upload error");
+        res.status(500).json({ error: "Mega upload failed" });
+      });
+
+      upload.on("complete", async (file) => {
+        const link = await file.link();
+        const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
+        const token = base64UrlEncode({ link, exp: expiresAt.toISOString() });
+        const base = PUBLIC_BASE_URL.endsWith("/") ? PUBLIC_BASE_URL.slice(0, -1) : PUBLIC_BASE_URL;
+        const downloadUrl = `${base}/${token}`;
+        res.json({
+          link,
+          token,
+          downloadUrl,
+          expiresAt: expiresAt.toISOString()
+        });
+        fs.unlink(tempPath, () => {});
+      });
+    } catch (err) {
+      console.error("Server error:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
+  req.pipe(busboy);
+});
+
+async function handleDownload(token, res) {
+  try {
+    const payload = base64UrlDecode(token);
+    const link = payload.link;
+    const exp = payload.exp ? new Date(payload.exp) : null;
+    if (!link) {
+      res.status(400).send("Invalid token");
+      return;
+    }
+    if (exp && Number.isFinite(exp.getTime()) && Date.now() > exp.getTime()) {
+      res.status(410).send("Lien expiré");
+      return;
+    }
+    const file = File.fromURL(link);
+    await file.loadAttributes();
+
+    res.setHeader("Content-Type", file.type || "application/octet-stream");
+    res.setHeader("Content-Disposition", `attachment; filename="${file.name}"`);
+
+    const stream = file.download();
+    stream.on("error", () => {
+      res.status(500).send("Download failed");
+    });
+    stream.pipe(res);
+  } catch (err) {
+    res.status(400).send("Invalid link");
+  }
+}
+
+app.get("/dl/:token", async (req, res) => {
+  handleDownload(req.params.token, res);
+});
+
+app.get("/:token([A-Za-z0-9_-]{16,})", async (req, res) => {
+  handleDownload(req.params.token, res);
+});
+
+app.listen(PORT, () => {
+  console.log(`Transfert backend listening on ${PORT}`);
+});

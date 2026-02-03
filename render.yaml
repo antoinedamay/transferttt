@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: transfert-backend
+    runtime: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    rootDir: server
+    envVars:
+      - key: MEGA_EMAIL
+        sync: false
+      - key: MEGA_PASSWORD
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: BASE_URL
+        sync: false
