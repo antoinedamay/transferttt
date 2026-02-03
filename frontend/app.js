@@ -97,7 +97,7 @@ function getTokenFromPath() {
   if (!last || last === "index.html" || last === "404.html") return null;
   if (last === "frontend") return null;
   if (last.includes(".")) return null;
-  if (last.length < 16) return null;
+  if (last.length < 6) return null;
   return last;
 }
 

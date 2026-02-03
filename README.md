@@ -33,6 +33,17 @@
 Dans `transfert/frontend/config.js` :
 - Remplacer `https://YOUR_RENDER_URL.onrender.com` par l'URL Render réelle
 
+## Liens courts (optionnel)
+Pour générer des liens courts du type `https://transfert.antoinedamay.fr/AbCd12`,
+il faut un stockage clé/valeur. Le backend supporte Upstash Redis (REST API).
+
+Ajouter ces variables d'environnement sur Render :
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+- `SHORT_CODE_LEN` (optionnel, par défaut 8)
+
+Si Upstash n'est pas configuré, le backend génère des liens longs (base64).
+
 ## DNS OVH (pour le sous-domaine)
 - Créer un **CNAME** :
   - `transfert` -> `<ton-username>.github.io`

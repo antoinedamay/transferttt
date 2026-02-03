@@ -30,6 +30,9 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || BASE_URL;
 const MAX_BYTES = 10 * 1024 * 1024 * 1024;
 const ALLOWED_EXPIRY_DAYS = [1, 7, 30, 90];
+const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+const SHORT_CODE_LEN = parseInt(process.env.SHORT_CODE_LEN || "8", 10);
 
 let storagePromise = null;
 
@@ -63,10 +66,67 @@ function sanitizeFilename(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
+function isShortCode(token) {
+  return typeof token === "string" && token.length >= 6 && token.length <= 12 && /^[A-Za-z0-9_-]+$/.test(token);
+}
+
+function generateShortCode(length) {
+  const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const bytes = crypto.randomBytes(length);
+  let out = "";
+  for (let i = 0; i < length; i++) {
+    out += alphabet[bytes[i] % alphabet.length];
+  }
+  return out;
+}
+
+async function kvGet(key) {
+  if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) return null;
+  const url = `${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(key)}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data || data.result == null) return null;
+  try {
+    return JSON.parse(data.result);
+  } catch (err) {
+    return null;
+  }
+}
+
+async function kvSet(key, value) {
+  if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) return false;
+  const encodedValue = encodeURIComponent(JSON.stringify(value));
+  const url = `${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(key)}/${encodedValue}`;
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`
+    }
+  });
+  if (!res.ok) return false;
+  const data = await res.json();
+  return data && data.result === "OK";
+}
+
+async function resolveToken(token) {
+  if (isShortCode(token)) {
+    const data = await kvGet(token);
+    if (!data) return null;
+    return data;
+  }
+  return base64UrlDecode(token);
+}
+
 app.use(cors());
 
 app.get("/api/health", (req, res) => {
-  res.json({ ok: true, time: new Date().toISOString() });
+  res.json({
+    ok: true,
+    time: new Date().toISOString(),
+    shortLinks: Boolean(UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN)
+  });
 });
 
 app.post("/api/upload", (req, res) => {
@@ -140,9 +200,35 @@ app.post("/api/upload", (req, res) => {
       upload.on("complete", async (file) => {
         const link = await file.link();
         const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
-        const token = base64UrlEncode({ link, exp: expiresAt.toISOString() });
         const base = PUBLIC_BASE_URL.endsWith("/") ? PUBLIC_BASE_URL.slice(0, -1) : PUBLIC_BASE_URL;
-        const downloadUrl = `${base}/${token}`;
+        let token = base64UrlEncode({ link, exp: expiresAt.toISOString() });
+        let downloadUrl = `${base}/${token}`;
+
+        if (UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN) {
+          let shortCode = null;
+          for (let i = 0; i < 5; i++) {
+            const candidate = generateShortCode(SHORT_CODE_LEN);
+            const exists = await kvGet(candidate);
+            if (!exists) {
+              shortCode = candidate;
+              break;
+            }
+          }
+          if (shortCode) {
+            const stored = {
+              link,
+              exp: expiresAt.toISOString(),
+              name: originalName,
+              size: stats.size
+            };
+            const storedOk = await kvSet(shortCode, stored);
+            if (storedOk) {
+              token = shortCode;
+              downloadUrl = `${base}/${shortCode}`;
+            }
+          }
+        }
+
         res.json({
           link,
           token,
@@ -162,7 +248,11 @@ app.post("/api/upload", (req, res) => {
 
 app.get("/api/info/:token", async (req, res) => {
   try {
-    const payload = base64UrlDecode(req.params.token);
+    const payload = await resolveToken(req.params.token);
+    if (!payload) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     const link = payload.link;
     const exp = payload.exp ? new Date(payload.exp) : null;
     if (!link) {
@@ -171,6 +261,15 @@ app.get("/api/info/:token", async (req, res) => {
     }
     if (exp && Number.isFinite(exp.getTime()) && Date.now() > exp.getTime()) {
       res.status(410).json({ error: "Expired" });
+      return;
+    }
+    if (payload.name || payload.size) {
+      res.json({
+        name: payload.name || "Fichier",
+        size: payload.size || null,
+        type: payload.type || null,
+        expiresAt: exp ? exp.toISOString() : null
+      });
       return;
     }
     const file = File.fromURL(link);
@@ -188,7 +287,11 @@ app.get("/api/info/:token", async (req, res) => {
 
 async function handleDownload(token, res) {
   try {
-    const payload = base64UrlDecode(token);
+    const payload = await resolveToken(token);
+    if (!payload) {
+      res.status(404).send("Lien introuvable");
+      return;
+    }
     const link = payload.link;
     const exp = payload.exp ? new Date(payload.exp) : null;
     if (!link) {
