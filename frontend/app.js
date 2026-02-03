@@ -63,6 +63,17 @@ function formatRemaining(ms) {
   return "Moins d'1h restante";
 }
 
+function decodeTokenPayload(token) {
+  try {
+    const padded = token.replace(/-/g, "+").replace(/_/g, "/");
+    const pad = padded.length % 4 === 0 ? "" : "=".repeat(4 - (padded.length % 4));
+    const json = atob(padded + pad);
+    return JSON.parse(json);
+  } catch (err) {
+    return null;
+  }
+}
+
 function resetUI() {
   uploadBox.hidden = true;
   resultBox.hidden = true;
@@ -101,6 +112,20 @@ async function showDownloadView(token) {
   downloadExpiry.textContent = "";
   downloadRemaining.textContent = "";
 
+  const payload = decodeTokenPayload(token);
+  if (payload && payload.exp) {
+    const expDate = new Date(payload.exp);
+    if (Number.isFinite(expDate.getTime())) {
+      downloadExpiry.textContent = `Expire le ${expDate.toLocaleDateString("fr-FR")}.`;
+      downloadRemaining.textContent = formatRemaining(expDate.getTime() - Date.now());
+      if (Date.now() > expDate.getTime()) {
+        downloadRemaining.textContent = "Lien expiré.";
+        downloadBtn.textContent = "Lien expiré";
+        return;
+      }
+    }
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/info/${token}`);
     if (res.status === 410) {
@@ -125,7 +150,11 @@ async function showDownloadView(token) {
       window.location.href = `${API_BASE}/dl/${token}`;
     };
   } catch (err) {
-    showError("Lien invalide ou temporairement indisponible.");
+    downloadBtn.textContent = "Télécharger";
+    downloadBtn.disabled = false;
+    downloadBtn.onclick = () => {
+      window.location.href = `${API_BASE}/dl/${token}`;
+    };
   }
 }
 
