@@ -553,6 +553,8 @@ body.download-step-2 #downloadStage1 {
   border-radius: 20px;
   padding: 20px;
   box-shadow: 0 16px 30px rgba(25, 32, 45, 0.08);
+  display: grid;
+  gap: 8px;
 }
 
 .download-right {
@@ -614,6 +616,12 @@ body.download-step-2 #downloadStage1 {
 .download-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.download-hint {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .error {

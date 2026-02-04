@@ -7,8 +7,18 @@
 window.TRANSFER_UI = window.TRANSFER_UI || {
   logo: "T",
   title: "Transfert",
-  subtitle: "Envoi de fichiers simple, rapide, propre.",
-  meta: "Max 10 Go • Stockage Mega",
   accent: "#ffb000",
-  publicBase: "https://transfert.antoinedamay.fr"
+  publicBase: "https://transfert.antoinedamay.fr",
+  gallery: [
+    "https://antoinedamay.fr/images/escp_01.jpg",
+    "https://antoinedamay.fr/images/rdr26_01.jpg",
+    "https://antoinedamay.fr/images/feh24_01.jpg",
+    "https://antoinedamay.fr/images/etranger_.jpg",
+    "https://antoinedamay.fr/images/pc_2.jpg",
+    "https://antoinedamay.fr/images/virage_1.jpg",
+    "https://antoinedamay.fr/images/diplome_1.jpg",
+    "https://antoinedamay.fr/images/hg_1.jpg",
+    "https://antoinedamay.fr/images/chri_1.jpg",
+    "https://antoinedamay.fr/images/athenea_3.jpg"
+  ]
 };

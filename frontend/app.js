@@ -21,7 +21,7 @@ const downloadName = document.getElementById("downloadName");
 const downloadSize = document.getElementById("downloadSize");
 const downloadExpiry = document.getElementById("downloadExpiry");
 const downloadRemaining = document.getElementById("downloadRemaining");
-const downloadBtn = document.getElementById("downloadBtn");
+const downloadHint = document.getElementById("downloadHint");
 const mainCard = document.getElementById("mainCard");
 const dropIcon = document.getElementById("dropIcon");
 const dropProgress = document.getElementById("dropProgress");
@@ -36,6 +36,7 @@ const downloadCarousel = document.getElementById("downloadCarousel");
 
 let pendingFile = null;
 let carouselTimer = null;
+let currentDownloadUrl = null;
 
 const API_BASE = window.TRANSFER_API_BASE;
 const MAX_BYTES = 10 * 1024 * 1024 * 1024;
@@ -121,6 +122,7 @@ function resetUI() {
   if (uploadView) uploadView.hidden = false;
   if (startUploadBtn) startUploadBtn.disabled = true;
   pendingFile = null;
+  currentDownloadUrl = null;
   if (downloadStage1) downloadStage1.hidden = false;
   if (downloadStage2) downloadStage2.hidden = true;
   if (carouselTimer) {
@@ -169,8 +171,8 @@ async function showDownloadView(token) {
   if (downloadView) downloadView.hidden = false;
   if (downloadStage1) downloadStage1.hidden = false;
   if (downloadStage2) downloadStage2.hidden = true;
-  downloadBtn.disabled = true;
-  downloadBtn.textContent = "Chargement...";
+  if (downloadHint) downloadHint.textContent = "Cliquez sur le rond pour télécharger.";
+  currentDownloadUrl = `${API_BASE}/dl/${token}`;
   downloadName.textContent = "Fichier";
   downloadSize.textContent = "";
   downloadExpiry.textContent = "";
@@ -186,17 +188,17 @@ async function showDownloadView(token) {
       downloadRemaining.textContent = formatRemaining(expDate.getTime() - Date.now());
       if (Date.now() > expDate.getTime()) {
         downloadRemaining.textContent = "Lien expiré.";
-        downloadBtn.textContent = "Lien expiré";
-        return;
-      }
+      if (downloadHint) downloadHint.textContent = "Lien expiré.";
+      return;
     }
+  }
   }
 
   try {
     const res = await fetch(`${API_BASE}/api/info/${token}`);
     if (res.status === 410) {
       downloadRemaining.textContent = "Lien expiré.";
-      downloadBtn.textContent = "Lien expiré";
+      if (downloadHint) downloadHint.textContent = "Lien expiré.";
       return;
     }
     if (!res.ok) throw new Error("invalid");
@@ -214,17 +216,9 @@ async function showDownloadView(token) {
       downloadExpiry.textContent = `Expire le ${expDate.toLocaleDateString("fr-FR")}.`;
       downloadRemaining.textContent = formatRemaining(expDate.getTime() - Date.now());
     }
-    downloadBtn.textContent = "Télécharger";
-    downloadBtn.disabled = false;
-    downloadBtn.onclick = () => {
-      window.location.href = `${API_BASE}/dl/${token}`;
-    };
+    if (downloadHint) downloadHint.textContent = "Cliquez sur le rond pour télécharger.";
   } catch (err) {
-    downloadBtn.textContent = "Télécharger";
-    downloadBtn.disabled = false;
-    downloadBtn.onclick = () => {
-      window.location.href = `${API_BASE}/dl/${token}`;
-    };
+    if (downloadHint) downloadHint.textContent = "Cliquez sur le rond pour télécharger.";
   }
 }
 
@@ -347,6 +341,17 @@ function initCarousel() {
   }, 4000);
 }
 
+function triggerDownload() {
+  if (!currentDownloadUrl) return;
+  const link = document.createElement("a");
+  link.href = currentDownloadUrl;
+  link.target = "_blank";
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
 copyBtn.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(downloadLink.value);
@@ -396,6 +401,8 @@ if (startUploadBtn) {
 
 if (downloadCircleBtn) {
   downloadCircleBtn.addEventListener("click", () => {
+    triggerDownload();
+    if (downloadHint) downloadHint.textContent = "Téléchargement en cours...";
     document.body.classList.remove("download-step-1");
     document.body.classList.add("download-step-2");
     if (downloadStage1) downloadStage1.hidden = true;
