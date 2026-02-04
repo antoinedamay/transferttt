@@ -26,8 +26,16 @@ const mainCard = document.getElementById("mainCard");
 const dropIcon = document.getElementById("dropIcon");
 const dropProgress = document.getElementById("dropProgress");
 const startUploadBtn = document.getElementById("startUploadBtn");
+const downloadStage1 = document.getElementById("downloadStage1");
+const downloadStage2 = document.getElementById("downloadStage2");
+const downloadCircleBtn = document.getElementById("downloadCircleBtn");
+const downloadBubbleName = document.getElementById("downloadBubbleName");
+const downloadBubbleMeta = document.getElementById("downloadBubbleMeta");
+const downloadLogo = document.getElementById("downloadLogo");
+const downloadCarousel = document.getElementById("downloadCarousel");
 
 let pendingFile = null;
+let carouselTimer = null;
 
 const API_BASE = window.TRANSFER_API_BASE;
 const MAX_BYTES = 10 * 1024 * 1024 * 1024;
@@ -40,6 +48,7 @@ function applyBranding() {
   const meta = document.getElementById("brandMeta");
   if (ui.logo && logo) logo.textContent = ui.logo;
   if (ui.logo && dropIcon) dropIcon.textContent = ui.logo;
+  if (ui.logo && downloadLogo) downloadLogo.textContent = ui.logo;
   if (ui.title && title) title.textContent = ui.title;
   if (ui.subtitle && subtitle) subtitle.textContent = ui.subtitle;
   if (ui.meta && meta) meta.textContent = ui.meta;
@@ -93,6 +102,7 @@ function resetUI() {
   document.body.classList.add("compact");
   document.body.classList.remove("download-mode");
   document.body.classList.remove("uploading");
+  document.body.classList.remove("centered");
   if (uploadView) uploadView.classList.add("compact");
   if (mainCard) mainCard.classList.add("compact");
   uploadBox.hidden = true;
@@ -109,6 +119,12 @@ function resetUI() {
   if (uploadView) uploadView.hidden = false;
   if (startUploadBtn) startUploadBtn.disabled = true;
   pendingFile = null;
+  if (downloadStage1) downloadStage1.hidden = false;
+  if (downloadStage2) downloadStage2.hidden = true;
+  if (carouselTimer) {
+    clearInterval(carouselTimer);
+    carouselTimer = null;
+  }
 }
 
 function showError(message) {
@@ -144,15 +160,19 @@ function getTokenFromPath() {
 async function showDownloadView(token) {
   resetUI();
   document.body.classList.add("download-mode");
-  document.body.classList.remove("compact");
+  document.body.classList.add("compact");
   if (uploadView) uploadView.hidden = true;
   if (downloadView) downloadView.hidden = false;
+  if (downloadStage1) downloadStage1.hidden = false;
+  if (downloadStage2) downloadStage2.hidden = true;
   downloadBtn.disabled = true;
   downloadBtn.textContent = "Chargement...";
   downloadName.textContent = "Fichier";
   downloadSize.textContent = "";
   downloadExpiry.textContent = "";
   downloadRemaining.textContent = "";
+  if (downloadBubbleName) downloadBubbleName.textContent = "Fichier";
+  if (downloadBubbleMeta) downloadBubbleMeta.textContent = "1 fichier";
 
   const payload = decodeTokenPayload(token);
   if (payload && payload.exp) {
@@ -180,7 +200,11 @@ async function showDownloadView(token) {
     downloadName.textContent = data.name || "Fichier";
     if (data.size != null) {
       downloadSize.textContent = formatBytes(data.size);
+      if (downloadBubbleMeta) {
+        downloadBubbleMeta.textContent = `${formatBytes(data.size)} • 1 fichier`;
+      }
     }
+    if (downloadBubbleName) downloadBubbleName.textContent = data.name || "Fichier";
     if (data.expiresAt) {
       const expDate = new Date(data.expiresAt);
       downloadExpiry.textContent = `Expire le ${expDate.toLocaleDateString("fr-FR")}.`;
@@ -210,6 +234,7 @@ function prepareFile(file) {
 
   document.body.classList.remove("compact");
   document.body.classList.remove("download-mode");
+  document.body.classList.add("centered");
   if (uploadView) uploadView.classList.remove("compact");
   if (mainCard) mainCard.classList.remove("compact");
   if (downloadView) downloadView.hidden = true;
@@ -285,6 +310,39 @@ function startUpload(file) {
   xhr.send(formData);
 }
 
+function initCarousel() {
+  if (!downloadCarousel) return;
+  const ui = window.TRANSFER_UI || {};
+  const images = Array.isArray(ui.gallery) ? ui.gallery : [];
+  const placeholders = [
+    "linear-gradient(135deg, #f4b07a, #e98c6a)",
+    "linear-gradient(135deg, #8fb4d8, #6b8fb0)",
+    "linear-gradient(135deg, #f0e0c5, #d9c4a0)",
+  ];
+
+  downloadCarousel.innerHTML = "";
+  const slides = (images.length ? images : placeholders).map((item, idx) => {
+    const slide = document.createElement("div");
+    slide.className = `carousel-slide${idx === 0 ? " active" : ""}`;
+    if (item.startsWith("http") || item.startsWith("data:")) {
+      slide.style.backgroundImage = `url('${item}')`;
+    } else {
+      slide.style.backgroundImage = item;
+    }
+    downloadCarousel.appendChild(slide);
+    return slide;
+  });
+
+  let activeIndex = 0;
+  if (carouselTimer) clearInterval(carouselTimer);
+  carouselTimer = setInterval(() => {
+    if (!slides.length) return;
+    slides[activeIndex].classList.remove("active");
+    activeIndex = (activeIndex + 1) % slides.length;
+    slides[activeIndex].classList.add("active");
+  }, 4000);
+}
+
 copyBtn.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(downloadLink.value);
@@ -329,6 +387,23 @@ dropzone.addEventListener("drop", (event) => {
 if (startUploadBtn) {
   startUploadBtn.addEventListener("click", () => {
     startUpload(pendingFile);
+  });
+}
+
+if (downloadCircleBtn) {
+  downloadCircleBtn.addEventListener("click", () => {
+    if (downloadStage1) downloadStage1.hidden = true;
+    if (downloadStage2) downloadStage2.hidden = false;
+    document.body.classList.remove("compact");
+    document.body.classList.add("centered");
+    initCarousel();
+  });
+
+  downloadCircleBtn.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      downloadCircleBtn.click();
+    }
   });
 }
 

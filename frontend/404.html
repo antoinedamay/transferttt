@@ -81,12 +81,34 @@
       </div>
 
       <div class="download" id="downloadView" hidden>
-        <div class="download-title">Votre fichier est prêt</div>
-        <div class="download-name" id="downloadName">Fichier</div>
-        <div class="download-size" id="downloadSize"></div>
-        <div class="download-expiry" id="downloadExpiry"></div>
-        <div class="download-remaining" id="downloadRemaining"></div>
-        <button id="downloadBtn" class="download-btn">Télécharger</button>
+        <div class="download-stage" id="downloadStage1">
+          <div class="download-bubble">
+            <div class="bubble-title">Cliquez pour télécharger</div>
+            <div class="bubble-name" id="downloadBubbleName">Fichier</div>
+            <div class="bubble-meta" id="downloadBubbleMeta">0 Mo • 1 fichier</div>
+          </div>
+          <div class="download-circle dropzone" id="downloadCircleBtn" role="button" tabindex="0">
+            <div class="drop-ring"></div>
+            <div class="drop-core">
+              <div class="drop-icon" id="downloadLogo">T</div>
+            </div>
+          </div>
+        </div>
+        <div class="download-stage download-stage-two" id="downloadStage2" hidden>
+          <div class="download-layout">
+            <div class="download-left">
+              <div class="download-title">Votre fichier est prêt</div>
+              <div class="download-name" id="downloadName">Fichier</div>
+              <div class="download-size" id="downloadSize"></div>
+              <div class="download-expiry" id="downloadExpiry"></div>
+              <div class="download-remaining" id="downloadRemaining"></div>
+              <button id="downloadBtn" class="download-btn">Télécharger</button>
+            </div>
+            <div class="download-right">
+              <div class="carousel" id="downloadCarousel"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="error" id="error" hidden></div>

@@ -35,6 +35,13 @@ body {
   padding: 120px 20px 90px;
 }
 
+body.centered .page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 120px 20px 90px;
+}
+
 body.compact .page {
   display: grid;
   place-items: center;
@@ -114,6 +121,7 @@ body.compact .page {
   box-shadow: var(--shadow);
   overflow: hidden;
   animation: rise 0.8s ease both;
+  width: min(980px, 92vw);
 }
 
 body.compact .card {
@@ -476,17 +484,95 @@ body.uploading .drop-icon {
 
 .download {
   display: none;
-  gap: 10px;
-  padding: 18px;
-  border-radius: 16px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  box-shadow: 0 16px 30px rgba(25, 32, 45, 0.08);
-  margin-top: 12px;
+  position: relative;
+  width: 100%;
 }
 
 body.download-mode .download {
+  display: block;
+}
+
+.download-stage {
   display: grid;
+  place-items: center;
+  gap: 16px;
+  min-height: 60vh;
+}
+
+.download-stage-two {
+  width: 100%;
+}
+
+.download-circle {
+  width: min(300px, 78vw);
+  height: min(300px, 78vw);
+}
+
+.download-bubble {
+  background: #ffffff;
+  color: #1f2430;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: var(--soft-shadow);
+  text-align: center;
+  font-size: 13px;
+}
+
+.bubble-title {
+  font-weight: 600;
+}
+
+.bubble-name {
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+.bubble-meta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.download-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) minmax(320px, 520px);
+  gap: 32px;
+  align-items: center;
+}
+
+.download-left {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 16px 30px rgba(25, 32, 45, 0.08);
+}
+
+.download-right {
+  position: relative;
+  min-height: 360px;
+}
+
+.carousel {
+  position: relative;
+  width: 100%;
+  height: 360px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(25, 32, 45, 0.18);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.carousel-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.carousel-slide.active {
+  opacity: 1;
 }
 
 .download-title {
@@ -543,6 +629,14 @@ body.download-mode .download {
 
   .drop-tooltip {
     top: -40px;
+  }
+
+  .download-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .download-right {
+    min-height: 240px;
   }
 }
 
