@@ -67,7 +67,7 @@ function sanitizeFilename(name) {
 }
 
 function isShortCode(token) {
-  return typeof token === "string" && token.length >= 6 && token.length <= 12 && /^[A-Za-z0-9_-]+$/.test(token);
+  return typeof token === "string" && token.length >= 3 && token.length <= 32 && /^[A-Za-z0-9_-]+$/.test(token);
 }
 
 function generateShortCode(length) {
