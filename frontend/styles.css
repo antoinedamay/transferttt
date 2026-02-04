@@ -97,7 +97,7 @@ body.compact .page {
 
 .brand-text .title {
   font-size: 56px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: -0.02em;
   text-transform: lowercase;
   font-family: "AntoineDisplay", "Outfit", sans-serif;
@@ -105,22 +105,12 @@ body.compact .page {
 }
 
 .logo {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #0a0a0a url("https://antoinedamay.fr/images/logorond.png") center/cover no-repeat;
-  color: transparent;
-  font-weight: 700;
-  box-shadow: none;
-  text-transform: lowercase;
-  line-height: 1;
+  display: none;
 }
 
 .brand-right {
   font-size: 56px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: -0.02em;
   text-transform: lowercase;
   color: #0a0a0a;
