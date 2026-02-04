@@ -84,6 +84,7 @@ function decodeTokenPayload(token) {
 }
 
 function resetUI() {
+  document.body.classList.add("compact");
   if (uploadView) uploadView.classList.add("compact");
   if (mainCard) mainCard.classList.add("compact");
   uploadBox.hidden = true;
@@ -194,6 +195,7 @@ function handleFile(file) {
     return;
   }
 
+  document.body.classList.remove("compact");
   if (uploadView) uploadView.classList.remove("compact");
   if (mainCard) mainCard.classList.remove("compact");
   uploadBox.hidden = false;

@@ -35,6 +35,18 @@ body {
   padding: 44px 20px 90px;
 }
 
+body.compact .topbar,
+body.compact .meta {
+  display: none;
+}
+
+body.compact .page {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 0 20px;
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -111,6 +123,13 @@ body {
   box-shadow: var(--shadow);
   overflow: hidden;
   animation: rise 0.8s ease both;
+}
+
+body.compact .card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
 }
 
 .card-top {
