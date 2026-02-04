@@ -198,6 +198,7 @@ function handleFile(file) {
   document.body.classList.remove("compact");
   if (uploadView) uploadView.classList.remove("compact");
   if (mainCard) mainCard.classList.remove("compact");
+  if (downloadView) downloadView.hidden = true;
   uploadBox.hidden = false;
   fileNameEl.textContent = file.name;
   fileSizeEl.textContent = formatBytes(file.size);
