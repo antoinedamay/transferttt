@@ -229,32 +229,25 @@ body.compact .card {
 
 .drop-tooltip {
   position: absolute;
-  top: -48px;
-  background: #ffffff;
-  color: #1f2430;
-  font-weight: 600;
-  padding: 8px 12px;
-  border-radius: 10px;
-  box-shadow: var(--soft-shadow);
-  font-size: 13px;
+  bottom: -38px;
+  background: rgba(255, 255, 255, 0.8);
+  color: rgba(31, 36, 48, 0.75);
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 999px;
+  box-shadow: 0 10px 18px rgba(25, 32, 45, 0.12);
+  font-size: 12px;
 }
 
 .drop-tooltip::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: -6px;
-  border-width: 6px 6px 0 6px;
-  border-style: solid;
-  border-color: #ffffff transparent transparent transparent;
+  content: none;
 }
 
 .dropzone {
   --progress: 0%;
   position: relative;
-  width: min(320px, 78vw);
-  height: min(320px, 78vw);
+  width: min(340px, 78vw);
+  height: min(340px, 78vw);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(6px);
@@ -292,15 +285,15 @@ body.compact .card {
 
 .drop-ring {
   position: absolute;
-  inset: 12px;
+  inset: 6px;
   border-radius: 50%;
   background: conic-gradient(var(--accent) var(--progress), rgba(255, 255, 255, 0.2) 0);
   mask: radial-gradient(circle, transparent 60%, #000 62%);
 }
 
 .drop-core {
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   background: #ffffff;
   display: grid;
@@ -311,14 +304,14 @@ body.compact .card {
 }
 
 .drop-icon {
-  width: 70px;
-  height: 70px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   background: linear-gradient(140deg, var(--accent-2), var(--accent));
   color: #ffffff;
   display: grid;
   place-items: center;
-  font-size: 30px;
+  font-size: 46px;
   font-weight: 700;
   box-shadow: 0 12px 24px rgba(232, 90, 99, 0.35);
   transition: transform 0.2s ease;
@@ -326,17 +319,6 @@ body.compact .card {
 
 .dropzone:hover .drop-icon {
   transform: scale(1.05);
-}
-
-.dz-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f2430;
-}
-
-.dz-sub {
-  color: var(--muted);
-  font-size: 13px;
 }
 
 #fileInput { display: none; }
