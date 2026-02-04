@@ -8,16 +8,20 @@
 </head>
 <body>
   <main class="page">
-    <header class="hero">
+    <header class="topbar">
       <div class="brand">
         <div class="logo" id="brandLogo">T</div>
-        <div>
+        <div class="brand-text">
           <div class="title" id="brandTitle">Transfert</div>
-          <div class="subtitle" id="brandSubtitle">Envoi de fichiers simple, rapide, propre.</div>
+          <div class="subtitle" id="brandSubtitle">Envoyez vos fichiers en un clic.</div>
         </div>
       </div>
-      <div class="meta" id="brandMeta">Max 10 Go • Stockage Mega</div>
+      <div class="top-actions">
+        <button class="pill ghost">Obtenir Transfert Pro</button>
+        <button class="pill">Menu</button>
+      </div>
     </header>
+    <div class="meta" id="brandMeta">Max 10 Go • Stockage Mega</div>
 
     <section class="card">
       <div class="card-top">
@@ -25,55 +29,64 @@
         <div class="card-title">Envoyez n'importe quel fichier en quelques secondes.</div>
       </div>
       <div id="uploadView">
-        <div class="options">
-          <label for="expiry">Durée de vie</label>
-          <select id="expiry">
-            <option value="1">1 jour</option>
-            <option value="7">7 jours</option>
-            <option value="30" selected>30 jours</option>
-            <option value="90">90 jours</option>
-          </select>
-        </div>
-        <div class="options">
-          <label for="customSlug">Nom du lien</label>
-          <input id="customSlug" type="text" placeholder="ex: monfichier" />
-        </div>
-        <div class="slug-help">
-          Le lien sera&nbsp;: <span id="slugPreview">https://transfert.antoinedamay.fr/monfichier</span>
-        </div>
+        <div class="panel">
+          <div class="panel-left">
+            <div class="drop-wrapper">
+              <div class="drop-tooltip">Cliquez pour envoyer vos fichiers</div>
+              <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Déposer un fichier">
+                <div class="drop-ring"></div>
+                <div class="drop-core">
+                  <div class="drop-icon">T</div>
+                </div>
+                <div class="dz-title">Cliquez ou déposez un fichier</div>
+                <div class="dz-sub">Glissez-déposez pour commencer</div>
+                <input id="fileInput" type="file" />
+              </div>
+            </div>
 
-        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Déposer un fichier">
-          <div class="drop-ring"></div>
-          <div class="drop-core">
-            <div class="drop-icon">+</div>
+            <div class="upload" id="upload" hidden>
+              <div class="upload-row">
+                <div class="file-name" id="fileName">Fichier</div>
+                <div class="file-size" id="fileSize">0 Mo</div>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+              </div>
+              <div class="upload-status" id="uploadStatus">En attente...</div>
+            </div>
           </div>
-          <div class="dz-title">Déposez votre fichier ici</div>
-          <div class="dz-sub">ou cliquez pour choisir</div>
-          <input id="fileInput" type="file" />
-        </div>
 
-        <div class="upload" id="upload" hidden>
-          <div class="upload-row">
-            <div class="file-name" id="fileName">Fichier</div>
-            <div class="file-size" id="fileSize">0 Mo</div>
-          </div>
-          <div class="progress">
-            <div class="progress-bar" id="progressBar"></div>
-          </div>
-          <div class="upload-status" id="uploadStatus">En attente...</div>
-        </div>
+          <div class="panel-right">
+            <div class="options">
+              <label for="expiry">Durée de vie</label>
+              <select id="expiry">
+                <option value="1">1 jour</option>
+                <option value="7">7 jours</option>
+                <option value="30" selected>30 jours</option>
+                <option value="90">90 jours</option>
+              </select>
+            </div>
+            <div class="options">
+              <label for="customSlug">Nom du lien</label>
+              <input id="customSlug" type="text" placeholder="ex: monfichier" />
+            </div>
+            <div class="slug-help">
+              Le lien sera&nbsp;: <span id="slugPreview">https://transfert.antoinedamay.fr/monfichier</span>
+            </div>
 
-        <div class="result" id="result" hidden>
-          <div class="result-title">Votre lien est prêt</div>
-          <div class="result-row">
-            <input id="downloadLink" type="text" readonly />
-            <button id="copyBtn">Copier</button>
+            <div class="result" id="result" hidden>
+              <div class="result-title">Votre lien est prêt</div>
+              <div class="result-row">
+                <input id="downloadLink" type="text" readonly />
+                <button id="copyBtn">Copier</button>
+              </div>
+              <div class="result-actions">
+                <a id="openBtn" href="#" target="_blank" rel="noopener">Ouvrir le lien</a>
+                <button id="newBtn" class="ghost">Envoyer un autre fichier</button>
+              </div>
+              <div class="note" id="expiryNote">Le lien reste valide tant que le fichier existe sur Mega.</div>
+            </div>
           </div>
-          <div class="result-actions">
-            <a id="openBtn" href="#" target="_blank" rel="noopener">Ouvrir le lien</a>
-            <button id="newBtn" class="ghost">Envoyer un autre fichier</button>
-          </div>
-          <div class="note" id="expiryNote">Le lien reste valide tant que le fichier existe sur Mega.</div>
         </div>
       </div>
 
