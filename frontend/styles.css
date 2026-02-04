@@ -32,23 +32,7 @@ body {
 .page {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 44px 20px 90px;
-}
-
-body.compact .meta {
-  display: none;
-}
-
-body.compact .topbar {
-  position: fixed;
-  top: 24px;
-  left: 24px;
-  margin: 0;
-  z-index: 10;
-}
-
-body.compact .brand-text .subtitle {
-  display: none;
+  padding: 120px 20px 90px;
 }
 
 body.compact .page {
@@ -63,7 +47,10 @@ body.compact .page {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 10px;
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 10;
   animation: rise 0.6s ease both;
 }
 
@@ -77,11 +64,6 @@ body.compact .page {
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.02em;
-}
-
-.brand-text .subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 14px;
 }
 
 .logo {
@@ -120,9 +102,7 @@ body.compact .page {
 }
 
 .meta {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 13px;
-  margin-bottom: 26px;
+  display: none;
 }
 
 .card {
@@ -353,10 +333,13 @@ body.compact .drop-tooltip {
 
 body.uploading .drop-progress {
   opacity: 1;
+  color: var(--accent);
 }
 
 body.uploading .drop-icon {
-  opacity: 0.2;
+  background: #ffffff;
+  color: transparent;
+  box-shadow: inset 0 0 0 10px rgba(232, 90, 99, 0.12);
 }
 
 #fileInput { display: none; }
