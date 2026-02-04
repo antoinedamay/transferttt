@@ -55,6 +55,13 @@ body.centered .page {
   padding: 120px 20px 90px;
 }
 
+body.centered #uploadView .panel {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 16px 30px rgba(25, 32, 45, 0.08);
+}
+
 body.compact .page {
   display: grid;
   place-items: center;
@@ -78,7 +85,7 @@ body.compact .page {
 
 .brand {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 14px;
 }
 
@@ -102,6 +109,7 @@ body.compact .page {
   font-weight: 700;
   box-shadow: none;
   text-transform: lowercase;
+  line-height: 1;
 }
 
 .brand-right {
