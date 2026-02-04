@@ -66,6 +66,11 @@ function sanitizeFilename(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
+function asciiFilename(name) {
+  const cleaned = sanitizeFilename(name || "fichier");
+  return cleaned || "fichier";
+}
+
 function isShortCode(token) {
   return typeof token === "string" && token.length >= 3 && token.length <= 32 && /^[A-Za-z0-9_-]+$/.test(token);
 }
@@ -333,8 +338,16 @@ async function handleDownload(token, res) {
     const file = File.fromURL(link);
     await file.loadAttributes();
 
+    const originalName = file.name || "fichier";
+    const fallbackName = asciiFilename(originalName);
+    const encodedName = encodeURIComponent(originalName)
+      .replace(/'/g, "%27")
+      .replace(/\*/g, "%2A")
+      .replace(/\(/g, "%28")
+      .replace(/\)/g, "%29");
+
     res.setHeader("Content-Type", file.type || "application/octet-stream");
-    res.setHeader("Content-Disposition", `attachment; filename="${file.name}"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${fallbackName}"; filename*=UTF-8''${encodedName}`);
 
     const stream = file.download();
     stream.on("error", () => {

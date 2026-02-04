@@ -624,6 +624,22 @@ body.download-step-2 #downloadStage1 {
   font-size: 13px;
 }
 
+.retry-btn {
+  margin-top: 6px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #1f2430;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(25, 32, 45, 0.08);
+}
+
+.retry-btn:hover {
+  border-color: var(--accent);
+}
+
 .error {
   margin-top: 20px;
   color: #c82432;

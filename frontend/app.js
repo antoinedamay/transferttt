@@ -33,6 +33,7 @@ const downloadBubbleName = document.getElementById("downloadBubbleName");
 const downloadBubbleMeta = document.getElementById("downloadBubbleMeta");
 const downloadLogo = document.getElementById("downloadLogo");
 const downloadCarousel = document.getElementById("downloadCarousel");
+const retryDownloadBtn = document.getElementById("retryDownloadBtn");
 
 let pendingFile = null;
 let carouselTimer = null;
@@ -198,9 +199,9 @@ async function showDownloadView(token) {
     const res = await fetch(`${API_BASE}/api/info/${token}`);
     if (res.status === 410) {
       downloadRemaining.textContent = "Lien expiré.";
-      if (downloadHint) downloadHint.textContent = "Lien expiré.";
-      return;
-    }
+    if (downloadHint) downloadHint.textContent = "Lien expiré.";
+    return;
+  }
     if (!res.ok) throw new Error("invalid");
     const data = await res.json();
     downloadName.textContent = data.name || "Fichier";
@@ -417,6 +418,13 @@ if (downloadCircleBtn) {
       event.preventDefault();
       downloadCircleBtn.click();
     }
+  });
+}
+
+if (retryDownloadBtn) {
+  retryDownloadBtn.addEventListener("click", () => {
+    triggerDownload();
+    if (downloadHint) downloadHint.textContent = "Téléchargement relancé...";
   });
 }
 

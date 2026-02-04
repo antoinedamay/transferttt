@@ -19,6 +19,16 @@ window.TRANSFER_UI = window.TRANSFER_UI || {
     "https://antoinedamay.fr/images/diplome_1.jpg",
     "https://antoinedamay.fr/images/hg_1.jpg",
     "https://antoinedamay.fr/images/chri_1.jpg",
-    "https://antoinedamay.fr/images/athenea_3.jpg"
+    "https://antoinedamay.fr/images/athenea_3.jpg",
+    "https://antoinedamay.fr/images/jpo2021_3.jpg",
+    "https://antoinedamay.fr/images/conf_1.jpg",
+    "https://antoinedamay.fr/images/cci_8.jpg",
+    "https://antoinedamay.fr/images/grillade_2.jpg",
+    "https://antoinedamay.fr/images/cata_3.jpg",
+    "https://antoinedamay.fr/images/organique_3.png",
+    "https://antoinedamay.fr/images/article_2.jpg",
+    "https://antoinedamay.fr/images/pliade_3.jpg",
+    "https://antoinedamay.fr/images/leon_1.jpg",
+    "https://antoinedamay.fr/images/escaut_1.jpg"
   ]
 };
