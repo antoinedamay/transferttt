@@ -10,6 +10,7 @@ window.TRANSFER_UI = window.TRANSFER_UI || {
   rightLabel: "antoine damay",
   accent: "#ffb000",
   publicBase: "https://transfert.antoinedamay.fr",
+  galleryEndpoint: "https://antoinedamay.fr/carousel.php",
   gallery: [
     "https://antoinedamay.fr/images/escp_01.jpg",
     "https://antoinedamay.fr/images/rdr26_01.jpg",

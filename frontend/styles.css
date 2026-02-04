@@ -25,7 +25,7 @@
 
 body {
   margin: 0;
-  font-family: "Outfit", "Space Grotesk", "Poppins", "Avenir Next", sans-serif;
+  font-family: "AntoineDisplay", "Outfit", "Space Grotesk", "Poppins", "Avenir Next", sans-serif;
   background:
     radial-gradient(1200px 800px at 10% 20%, rgba(237, 90, 102, 0.85) 0%, rgba(237, 90, 102, 0.2) 45%, transparent 70%),
     radial-gradient(900px 700px at 80% 20%, rgba(92, 123, 218, 0.85) 0%, rgba(92, 123, 218, 0.25) 50%, transparent 70%),
@@ -33,6 +33,13 @@ body {
     linear-gradient(120deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 70%, var(--bg-4) 100%);
   color: var(--text);
   min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
 
 .page {
@@ -76,35 +83,33 @@ body.compact .page {
 }
 
 .brand-text .title {
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 700;
   letter-spacing: -0.02em;
   text-transform: lowercase;
   font-family: "AntoineDisplay", "Outfit", sans-serif;
+  color: #0a0a0a;
 }
 
 .logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 16px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--accent);
+  background: #0a0a0a;
+  color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
-}
-
-.topbar .logo {
-  display: none;
+  box-shadow: none;
+  text-transform: lowercase;
 }
 
 .brand-right {
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 700;
   letter-spacing: -0.02em;
   text-transform: lowercase;
-  color: rgba(255, 255, 255, 0.95);
+  color: #0a0a0a;
   font-family: "AntoineDisplay", "Outfit", sans-serif;
 }
 

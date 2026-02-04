@@ -312,10 +312,24 @@ function startUpload(file) {
   xhr.send(formData);
 }
 
-function initCarousel() {
+async function initCarousel() {
   if (!downloadCarousel) return;
   const ui = window.TRANSFER_UI || {};
-  const images = Array.isArray(ui.gallery) ? ui.gallery : [];
+  let images = [];
+  if (ui.galleryEndpoint) {
+    try {
+      const res = await fetch(ui.galleryEndpoint, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) images = data;
+      }
+    } catch (err) {
+      images = [];
+    }
+  }
+  if (!images.length) {
+    images = Array.isArray(ui.gallery) ? ui.gallery : [];
+  }
   const placeholders = [
     "linear-gradient(135deg, #f4b07a, #e98c6a)",
     "linear-gradient(135deg, #8fb4d8, #6b8fb0)",
