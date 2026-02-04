@@ -124,6 +124,15 @@ body.compact .page {
   width: min(980px, 92vw);
 }
 
+body.download-step-1 .card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  width: auto;
+  overflow: visible;
+}
+
 body.compact .card {
   background: transparent;
   border: none;
