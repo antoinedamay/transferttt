@@ -440,7 +440,7 @@ body.compact .card {
 }
 
 .download {
-  display: grid;
+  display: none;
   gap: 10px;
   padding: 18px;
   border-radius: 16px;
@@ -448,6 +448,10 @@ body.compact .card {
   background: #ffffff;
   box-shadow: 0 16px 30px rgba(25, 32, 45, 0.08);
   margin-top: 12px;
+}
+
+body.download-mode .download {
+  display: grid;
 }
 
 .download-title {

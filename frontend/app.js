@@ -85,6 +85,7 @@ function decodeTokenPayload(token) {
 
 function resetUI() {
   document.body.classList.add("compact");
+  document.body.classList.remove("download-mode");
   if (uploadView) uploadView.classList.add("compact");
   if (mainCard) mainCard.classList.add("compact");
   uploadBox.hidden = true;
@@ -132,6 +133,8 @@ function getTokenFromPath() {
 
 async function showDownloadView(token) {
   resetUI();
+  document.body.classList.add("download-mode");
+  document.body.classList.remove("compact");
   if (uploadView) uploadView.hidden = true;
   if (downloadView) downloadView.hidden = false;
   downloadBtn.disabled = true;
@@ -196,6 +199,7 @@ function handleFile(file) {
   }
 
   document.body.classList.remove("compact");
+  document.body.classList.remove("download-mode");
   if (uploadView) uploadView.classList.remove("compact");
   if (mainCard) mainCard.classList.remove("compact");
   if (downloadView) downloadView.hidden = true;
