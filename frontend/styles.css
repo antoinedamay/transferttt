@@ -1,29 +1,30 @@
 :root {
-  --bg: #0e0f13;
-  --card: #151824;
+  --bg: #0a0c12;
+  --card: #0f1320;
   --accent: #ffb000;
   --text: #f5f7ff;
-  --muted: #a6adc8;
-  --stroke: #2a2f45;
+  --muted: #98a2b3;
+  --stroke: #2a3148;
   --success: #1db954;
   --danger: #ff5d5d;
+  --glow: rgba(255, 176, 0, 0.35);
 }
 
 * { box-sizing: border-box; }
 body {
   margin: 0;
-  font-family: "Poppins", "Avenir Next", "Segoe UI", sans-serif;
-  background: radial-gradient(1200px 800px at 10% -10%, #2a1a00 0%, transparent 55%),
-              radial-gradient(1200px 800px at 90% -20%, #001f2a 0%, transparent 60%),
-              var(--bg);
+  font-family: "Space Grotesk", "Poppins", "Avenir Next", "Segoe UI", sans-serif;
+  background: radial-gradient(900px 700px at 10% -10%, rgba(255, 176, 0, 0.18) 0%, transparent 60%),
+              radial-gradient(900px 700px at 90% -20%, rgba(0, 169, 255, 0.16) 0%, transparent 60%),
+              linear-gradient(180deg, #0a0c12 0%, #0b0f1a 60%, #0a0c12 100%);
   color: var(--text);
   min-height: 100vh;
 }
 
 .page {
-  max-width: 920px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 48px 20px 80px;
+  padding: 52px 20px 90px;
 }
 
 .hero {
@@ -32,6 +33,7 @@ body {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 28px;
+  animation: rise 0.6s ease both;
 }
 
 .brand {
@@ -41,19 +43,21 @@ body {
 }
 
 .logo {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
   display: grid;
   place-items: center;
-  background: linear-gradient(140deg, #ffd36a, #ff8a00);
+  background: linear-gradient(140deg, #ffe08a, #ff8a00);
   color: #2a1a00;
   font-weight: 700;
+  box-shadow: 0 10px 30px var(--glow);
 }
 
 .title {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
@@ -66,11 +70,39 @@ body {
 }
 
 .card {
+  position: relative;
   background: var(--card);
   border: 1px solid var(--stroke);
-  border-radius: 20px;
-  padding: 28px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  animation: rise 0.8s ease both;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -40% 60% 60% -40%;
+  background: radial-gradient(circle, rgba(255, 176, 0, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.card-top {
+  margin-bottom: 18px;
+}
+
+.card-kicker {
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.card-title {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .options {
@@ -102,6 +134,12 @@ body {
   width: 220px;
 }
 
+.options select:focus,
+.options input:focus {
+  outline: 2px solid rgba(255, 176, 0, 0.35);
+  border-color: var(--accent);
+}
+
 .slug-help {
   margin-top: -8px;
   margin-bottom: 16px;
@@ -116,22 +154,23 @@ body {
 
 .dropzone {
   border: 2px dashed #3a405c;
-  border-radius: 18px;
-  padding: 48px 20px;
+  border-radius: 20px;
+  padding: 56px 20px;
   text-align: center;
-  background: rgba(17, 21, 33, 0.4);
+  background: rgba(13, 18, 32, 0.7);
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .dropzone:hover,
 .dropzone.dragover {
   border-color: var(--accent);
   transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
 }
 
 .dz-title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
 }
 
@@ -144,6 +183,12 @@ body {
 
 .upload {
   margin-top: 24px;
+}
+
+.upload,
+.result,
+.download {
+  animation: rise 0.5s ease both;
 }
 
 .upload-row {
@@ -163,7 +208,7 @@ body {
 .progress {
   width: 100%;
   height: 10px;
-  background: #0f1220;
+  background: #0c101d;
   border-radius: 999px;
   overflow: hidden;
 }
@@ -173,6 +218,7 @@ body {
   width: 0%;
   background: linear-gradient(90deg, #ff8a00, #ffd36a);
   transition: width 0.2s;
+  box-shadow: 0 0 12px var(--glow);
 }
 
 .upload-status {
@@ -183,7 +229,7 @@ body {
 .result {
   margin-top: 24px;
   padding: 18px;
-  border-radius: 14px;
+  border-radius: 16px;
   border: 1px solid #2f354f;
   background: rgba(11, 14, 22, 0.6);
 }
@@ -200,7 +246,7 @@ body {
 
 .result-row input {
   flex: 1;
-  background: #0f1220;
+  background: #0c101d;
   color: var(--text);
   border: 1px solid #2f354f;
   border-radius: 10px;
@@ -214,6 +260,7 @@ body {
   border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
+  box-shadow: 0 10px 20px var(--glow);
 }
 
 .result-actions {
@@ -250,7 +297,7 @@ body {
   display: grid;
   gap: 10px;
   padding: 18px;
-  border-radius: 14px;
+  border-radius: 16px;
   border: 1px solid #2f354f;
   background: rgba(11, 14, 22, 0.6);
 }
@@ -279,6 +326,7 @@ body {
   border-radius: 12px;
   cursor: pointer;
   font-weight: 700;
+  box-shadow: 0 12px 24px var(--glow);
 }
 
 .download-btn:disabled {
@@ -300,5 +348,16 @@ body {
 
   .result-row {
     flex-direction: column;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
