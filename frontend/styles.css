@@ -121,6 +121,7 @@ body.compact .card {
   border: none;
   box-shadow: none;
   padding: 0;
+  overflow: visible;
 }
 
 .card-top {
