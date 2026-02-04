@@ -25,6 +25,9 @@ const downloadBtn = document.getElementById("downloadBtn");
 const mainCard = document.getElementById("mainCard");
 const dropIcon = document.getElementById("dropIcon");
 const dropProgress = document.getElementById("dropProgress");
+const startUploadBtn = document.getElementById("startUploadBtn");
+
+let pendingFile = null;
 
 const API_BASE = window.TRANSFER_API_BASE;
 const MAX_BYTES = 10 * 1024 * 1024 * 1024;
@@ -104,6 +107,8 @@ function resetUI() {
   expiryNote.textContent = "Le lien reste valide tant que le fichier existe sur Mega.";
   if (downloadView) downloadView.hidden = true;
   if (uploadView) uploadView.hidden = false;
+  if (startUploadBtn) startUploadBtn.disabled = true;
+  pendingFile = null;
 }
 
 function showError(message) {
@@ -195,7 +200,7 @@ async function showDownloadView(token) {
   }
 }
 
-function handleFile(file) {
+function prepareFile(file) {
   resetUI();
   if (!file) return;
   if (file.size > MAX_BYTES) {
@@ -205,10 +210,16 @@ function handleFile(file) {
 
   document.body.classList.remove("compact");
   document.body.classList.remove("download-mode");
-  document.body.classList.add("uploading");
   if (uploadView) uploadView.classList.remove("compact");
   if (mainCard) mainCard.classList.remove("compact");
   if (downloadView) downloadView.hidden = true;
+  pendingFile = file;
+  if (startUploadBtn) startUploadBtn.disabled = false;
+}
+
+function startUpload(file) {
+  if (!file) return;
+  document.body.classList.add("uploading");
   uploadBox.hidden = false;
   fileNameEl.textContent = file.name;
   fileSizeEl.textContent = formatBytes(file.size);
@@ -295,7 +306,7 @@ if (customSlugInput) {
 }
 
 fileInput.addEventListener("change", (event) => {
-  handleFile(event.target.files[0]);
+  prepareFile(event.target.files[0]);
 });
 
 dropzone.addEventListener("click", () => fileInput.click());
@@ -312,8 +323,14 @@ dropzone.addEventListener("dragleave", () => {
 dropzone.addEventListener("drop", (event) => {
   event.preventDefault();
   dropzone.classList.remove("dragover");
-  handleFile(event.dataTransfer.files[0]);
+  prepareFile(event.dataTransfer.files[0]);
 });
+
+if (startUploadBtn) {
+  startUploadBtn.addEventListener("click", () => {
+    startUpload(pendingFile);
+  });
+}
 
 applyBranding();
 const token = getTokenFromPath();
