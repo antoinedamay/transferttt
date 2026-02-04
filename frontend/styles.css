@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
+@font-face {
+  font-family: "AntoineDisplay";
+  src: url("https://antoinedamay.fr/type/HelveticaLTStd-Bold.otf") format("opentype");
+  font-display: swap;
+}
+
 :root {
   --bg-1: #ed5a66;
   --bg-2: #f3a05f;
@@ -51,19 +57,21 @@ body.compact .page {
 
 .topbar {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 16px;
   position: fixed;
   top: 24px;
   left: 24px;
+  right: 24px;
+  width: calc(100% - 48px);
   z-index: 10;
   animation: rise 0.6s ease both;
 }
 
 .brand {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 14px;
 }
 
@@ -71,6 +79,8 @@ body.compact .page {
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.02em;
+  text-transform: lowercase;
+  font-family: "AntoineDisplay", "Outfit", sans-serif;
 }
 
 .logo {
@@ -83,6 +93,19 @@ body.compact .page {
   color: var(--accent);
   font-weight: 700;
   box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+}
+
+.topbar .logo {
+  display: none;
+}
+
+.brand-right {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+  color: rgba(255, 255, 255, 0.95);
+  font-family: "AntoineDisplay", "Outfit", sans-serif;
 }
 
 .top-actions {

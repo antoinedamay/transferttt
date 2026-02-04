@@ -6,7 +6,8 @@
 
 window.TRANSFER_UI = window.TRANSFER_UI || {
   logo: "T",
-  title: "Transfert",
+  title: "transfert",
+  rightLabel: "antoine damay",
   accent: "#ffb000",
   publicBase: "https://transfert.antoinedamay.fr",
   gallery: [

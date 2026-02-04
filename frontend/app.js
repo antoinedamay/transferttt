@@ -48,12 +48,14 @@ function applyBranding() {
   const title = document.getElementById("brandTitle");
   const subtitle = document.getElementById("brandSubtitle");
   const meta = document.getElementById("brandMeta");
+  const right = document.getElementById("brandRight");
   if (ui.logo && logo) logo.textContent = ui.logo;
   if (ui.logo && dropIcon) dropIcon.textContent = ui.logo;
   if (ui.logo && downloadLogo) downloadLogo.textContent = ui.logo;
   if (ui.title && title) title.textContent = ui.title;
   if (ui.subtitle && subtitle) subtitle.textContent = ui.subtitle;
   if (ui.meta && meta) meta.textContent = ui.meta;
+  if (ui.rightLabel && right) right.textContent = ui.rightLabel;
   if (ui.accent) {
     document.documentElement.style.setProperty("--accent", ui.accent);
   }
