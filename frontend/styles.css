@@ -232,7 +232,7 @@ body.compact .card {
   transition: opacity 0.2s ease;
 }
 
-body.compact .drop-tooltip {
+.drop-tooltip {
   opacity: 1;
 }
 
