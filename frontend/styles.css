@@ -110,7 +110,7 @@ body.compact .page {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #0a0a0a url("https://antoinedamay.fr/images/tete_180.png") center/cover no-repeat;
+  background: #0a0a0a url("https://antoinedamay.fr/images/logorond.png") center/cover no-repeat;
   color: transparent;
   font-weight: 700;
   box-shadow: none;
@@ -365,7 +365,7 @@ body.compact .drop-tooltip {
   height: 190px;
   border-radius: 50%;
   background:
-    url("https://antoinedamay.fr/images/tete_180.png") center/cover no-repeat,
+    url("https://antoinedamay.fr/images/logorond.png") center/cover no-repeat,
     linear-gradient(140deg, var(--accent-2), var(--accent));
   color: transparent;
   display: grid;
