@@ -22,6 +22,7 @@ const downloadSize = document.getElementById("downloadSize");
 const downloadExpiry = document.getElementById("downloadExpiry");
 const downloadRemaining = document.getElementById("downloadRemaining");
 const downloadBtn = document.getElementById("downloadBtn");
+const mainCard = document.getElementById("mainCard");
 
 const API_BASE = window.TRANSFER_API_BASE;
 const MAX_BYTES = 10 * 1024 * 1024 * 1024;
@@ -83,6 +84,8 @@ function decodeTokenPayload(token) {
 }
 
 function resetUI() {
+  if (uploadView) uploadView.classList.add("compact");
+  if (mainCard) mainCard.classList.add("compact");
   uploadBox.hidden = true;
   resultBox.hidden = true;
   errorBox.hidden = true;
@@ -191,6 +194,8 @@ function handleFile(file) {
     return;
   }
 
+  if (uploadView) uploadView.classList.remove("compact");
+  if (mainCard) mainCard.classList.remove("compact");
   uploadBox.hidden = false;
   fileNameEl.textContent = file.name;
   fileSizeEl.textContent = formatBytes(file.size);

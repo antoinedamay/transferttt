@@ -148,6 +148,23 @@ body {
   gap: 14px;
 }
 
+.card.compact .card-top {
+  display: none;
+}
+
+#uploadView.compact .panel {
+  grid-template-columns: 1fr;
+}
+
+#uploadView.compact .panel-right,
+#uploadView.compact .upload {
+  display: none;
+}
+
+#uploadView.compact .panel-left {
+  justify-items: center;
+}
+
 .options {
   display: grid;
   gap: 6px;
