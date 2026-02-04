@@ -96,10 +96,11 @@ async function kvGet(key) {
   }
 }
 
-async function kvSet(key, value) {
+async function kvSet(key, value, ttlSeconds) {
   if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) return false;
   const encodedValue = encodeURIComponent(JSON.stringify(value));
-  const url = `${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(key)}/${encodedValue}`;
+  const ttl = Math.max(1, Math.floor(ttlSeconds || 1));
+  const url = `${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(key)}/${encodedValue}?EX=${ttl}`;
   const res = await fetch(url, {
     headers: {
       Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`
@@ -247,7 +248,8 @@ app.post("/api/upload", (req, res) => {
               name: originalName,
               size: stats.size
             };
-            const storedOk = await kvSet(shortCode, stored);
+            const ttlSeconds = Math.max(1, Math.floor((expiresAt.getTime() - Date.now()) / 1000));
+            const storedOk = await kvSet(shortCode, stored, ttlSeconds);
             if (storedOk) {
               token = shortCode;
               downloadUrl = `${base}/${shortCode}`;
