@@ -23,6 +23,8 @@ const downloadExpiry = document.getElementById("downloadExpiry");
 const downloadRemaining = document.getElementById("downloadRemaining");
 const downloadBtn = document.getElementById("downloadBtn");
 const mainCard = document.getElementById("mainCard");
+const dropIcon = document.getElementById("dropIcon");
+const dropProgress = document.getElementById("dropProgress");
 
 const API_BASE = window.TRANSFER_API_BASE;
 const MAX_BYTES = 10 * 1024 * 1024 * 1024;
@@ -34,6 +36,7 @@ function applyBranding() {
   const subtitle = document.getElementById("brandSubtitle");
   const meta = document.getElementById("brandMeta");
   if (ui.logo && logo) logo.textContent = ui.logo;
+  if (ui.logo && dropIcon) dropIcon.textContent = ui.logo;
   if (ui.title && title) title.textContent = ui.title;
   if (ui.subtitle && subtitle) subtitle.textContent = ui.subtitle;
   if (ui.meta && meta) meta.textContent = ui.meta;
@@ -86,6 +89,7 @@ function decodeTokenPayload(token) {
 function resetUI() {
   document.body.classList.add("compact");
   document.body.classList.remove("download-mode");
+  document.body.classList.remove("uploading");
   if (uploadView) uploadView.classList.add("compact");
   if (mainCard) mainCard.classList.add("compact");
   uploadBox.hidden = true;
@@ -95,6 +99,7 @@ function resetUI() {
   if (dropzone) {
     dropzone.style.setProperty("--progress", "0%");
   }
+  if (dropProgress) dropProgress.textContent = "0%";
   uploadStatus.textContent = "En attente...";
   expiryNote.textContent = "Le lien reste valide tant que le fichier existe sur Mega.";
   if (downloadView) downloadView.hidden = true;
@@ -200,6 +205,7 @@ function handleFile(file) {
 
   document.body.classList.remove("compact");
   document.body.classList.remove("download-mode");
+  document.body.classList.add("uploading");
   if (uploadView) uploadView.classList.remove("compact");
   if (mainCard) mainCard.classList.remove("compact");
   if (downloadView) downloadView.hidden = true;
@@ -225,12 +231,16 @@ function handleFile(file) {
     if (dropzone) {
       dropzone.style.setProperty("--progress", `${pct}%`);
     }
+    if (dropProgress) {
+      dropProgress.textContent = `${pct}%`;
+    }
     uploadStatus.textContent = `Envoi en cours... ${pct}%`;
   });
   xhr.addEventListener("load", () => {
     if (xhr.status >= 200 && xhr.status < 300) {
       const data = JSON.parse(xhr.responseText);
       uploadStatus.textContent = "Upload terminé";
+      document.body.classList.remove("uploading");
       resultBox.hidden = false;
       downloadLink.value = data.downloadUrl;
       openBtn.href = data.downloadUrl;
@@ -239,6 +249,7 @@ function handleFile(file) {
         expiryNote.textContent = `Lien valide jusqu'au ${date.toLocaleDateString("fr-FR")}.`;
       }
     } else {
+      document.body.classList.remove("uploading");
       try {
         const data = JSON.parse(xhr.responseText || "{}");
         if (data && data.error) {
@@ -252,9 +263,11 @@ function handleFile(file) {
     }
   });
   xhr.addEventListener("error", () => {
+    document.body.classList.remove("uploading");
     showError("Impossible de contacter le serveur.");
   });
   xhr.addEventListener("timeout", () => {
+    document.body.classList.remove("uploading");
     showError("Temps dépassé. Réessaie.");
   });
 

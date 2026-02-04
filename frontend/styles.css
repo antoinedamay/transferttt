@@ -230,13 +230,13 @@ body.compact .card {
 .drop-tooltip {
   position: absolute;
   bottom: -32px;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.65);
   color: rgba(31, 36, 48, 0.7);
   font-weight: 500;
-  padding: 5px 10px;
+  padding: 4px 10px;
   border-radius: 999px;
-  box-shadow: 0 8px 16px rgba(25, 32, 45, 0.12);
-  font-size: 11px;
+  box-shadow: 0 6px 14px rgba(25, 32, 45, 0.12);
+  font-size: 10.5px;
 }
 
 .drop-tooltip::after {
@@ -264,7 +264,7 @@ body.compact .card {
 .dropzone::after {
   content: "";
   position: absolute;
-  inset: -12px;
+  inset: -10px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.45);
   opacity: 0;
@@ -272,7 +272,7 @@ body.compact .card {
 }
 
 .dropzone::after {
-  inset: -24px;
+  inset: -20px;
   border-color: rgba(255, 255, 255, 0.3);
   animation-delay: 1.3s;
 }
@@ -292,8 +292,8 @@ body.compact .card {
 }
 
 .drop-core {
-  width: 180px;
-  height: 180px;
+  width: 190px;
+  height: 190px;
   border-radius: 50%;
   background: #ffffff;
   display: grid;
@@ -304,14 +304,14 @@ body.compact .card {
 }
 
 .drop-icon {
-  width: 180px;
-  height: 180px;
+  width: 190px;
+  height: 190px;
   border-radius: 50%;
   background: linear-gradient(140deg, var(--accent-2), var(--accent));
   color: #ffffff;
   display: grid;
   place-items: center;
-  font-size: 46px;
+  font-size: 54px;
   font-weight: 700;
   box-shadow: 0 12px 24px rgba(232, 90, 99, 0.35);
   transition: transform 0.2s ease;
@@ -319,6 +319,27 @@ body.compact .card {
 
 .dropzone:hover .drop-icon {
   transform: scale(1.05);
+}
+
+.drop-progress {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+body.uploading .drop-progress {
+  opacity: 1;
+}
+
+body.uploading .drop-icon {
+  opacity: 0.2;
 }
 
 #fileInput { display: none; }
@@ -330,11 +351,7 @@ body.compact .card {
 }
 
 .upload {
-  width: 100%;
-  border-radius: 16px;
-  padding: 14px 16px;
-  background: #f8fafc;
-  border: 1px solid #eef2f6;
+  display: none;
 }
 
 .upload-row {
