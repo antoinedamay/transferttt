@@ -58,8 +58,14 @@ body.centered .page {
 body.centered #uploadView .panel {
   background: #ffffff;
   border-radius: 20px;
-  padding: 24px;
+  padding: 36px;
   box-shadow: 0 16px 30px rgba(25, 32, 45, 0.08);
+  gap: 32px;
+}
+
+body.centered #uploadView .panel-left,
+body.centered #uploadView .panel-right {
+  gap: 18px;
 }
 
 body.compact .page {
@@ -90,7 +96,7 @@ body.compact .page {
 }
 
 .brand-text .title {
-  font-size: 34px;
+  font-size: 56px;
   font-weight: 700;
   letter-spacing: -0.02em;
   text-transform: lowercase;
@@ -113,7 +119,7 @@ body.compact .page {
 }
 
 .brand-right {
-  font-size: 34px;
+  font-size: 56px;
   font-weight: 700;
   letter-spacing: -0.02em;
   text-transform: lowercase;
@@ -714,6 +720,11 @@ body.download-step-2 #downloadStage1 {
 
   .download-right {
     min-height: 240px;
+  }
+
+  .brand-text .title,
+  .brand-right {
+    font-size: 36px;
   }
 }
 
