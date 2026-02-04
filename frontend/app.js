@@ -165,7 +165,8 @@ function getTokenFromPath() {
 async function showDownloadView(token) {
   resetUI();
   document.body.classList.add("download-mode");
-  document.body.classList.add("compact");
+  document.body.classList.remove("compact");
+  document.body.classList.add("centered");
   document.body.classList.add("download-step-1");
   document.body.classList.remove("download-step-2");
   if (uploadView) uploadView.hidden = true;
@@ -344,13 +345,15 @@ function initCarousel() {
 
 function triggerDownload() {
   if (!currentDownloadUrl) return;
-  const link = document.createElement("a");
-  link.href = currentDownloadUrl;
-  link.target = "_blank";
-  link.rel = "noopener";
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+  let frame = document.getElementById("downloadFrame");
+  if (!frame) {
+    frame = document.createElement("iframe");
+    frame.id = "downloadFrame";
+    frame.style.display = "none";
+    frame.title = "Téléchargement";
+    document.body.appendChild(frame);
+  }
+  frame.src = currentDownloadUrl;
 }
 
 copyBtn.addEventListener("click", async () => {
@@ -408,8 +411,6 @@ if (downloadCircleBtn) {
     document.body.classList.add("download-step-2");
     if (downloadStage1) downloadStage1.hidden = true;
     if (downloadStage2) downloadStage2.hidden = false;
-    document.body.classList.remove("compact");
-    document.body.classList.add("centered");
     initCarousel();
   });
 
