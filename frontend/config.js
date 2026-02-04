@@ -8,7 +8,7 @@ window.TRANSFER_UI = window.TRANSFER_UI || {
   logo: "T",
   title: "transfert",
   rightLabel: "antoine damay",
-  accent: "#ffb000",
+  accent: "#ff4500",
   publicBase: "https://transfert.antoinedamay.fr",
   galleryEndpoint: "https://antoinedamay.fr/carousel.php",
   gallery: [
