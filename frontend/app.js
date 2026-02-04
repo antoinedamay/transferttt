@@ -103,6 +103,8 @@ function resetUI() {
   document.body.classList.remove("download-mode");
   document.body.classList.remove("uploading");
   document.body.classList.remove("centered");
+  document.body.classList.remove("download-step-2");
+  document.body.classList.add("download-step-1");
   if (uploadView) uploadView.classList.add("compact");
   if (mainCard) mainCard.classList.add("compact");
   uploadBox.hidden = true;
@@ -161,6 +163,8 @@ async function showDownloadView(token) {
   resetUI();
   document.body.classList.add("download-mode");
   document.body.classList.add("compact");
+  document.body.classList.add("download-step-1");
+  document.body.classList.remove("download-step-2");
   if (uploadView) uploadView.hidden = true;
   if (downloadView) downloadView.hidden = false;
   if (downloadStage1) downloadStage1.hidden = false;
@@ -392,6 +396,8 @@ if (startUploadBtn) {
 
 if (downloadCircleBtn) {
   downloadCircleBtn.addEventListener("click", () => {
+    document.body.classList.remove("download-step-1");
+    document.body.classList.add("download-step-2");
     if (downloadStage1) downloadStage1.hidden = true;
     if (downloadStage2) downloadStage2.hidden = false;
     document.body.classList.remove("compact");

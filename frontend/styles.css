@@ -492,6 +492,14 @@ body.download-mode .download {
   display: block;
 }
 
+body.download-step-1 #downloadStage2 {
+  display: none;
+}
+
+body.download-step-2 #downloadStage1 {
+  display: none;
+}
+
 .download-stage {
   display: grid;
   place-items: center;
