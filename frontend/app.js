@@ -87,6 +87,9 @@ function resetUI() {
   resultBox.hidden = true;
   errorBox.hidden = true;
   progressBar.style.width = "0%";
+  if (dropzone) {
+    dropzone.style.setProperty("--progress", "0%");
+  }
   uploadStatus.textContent = "En attente...";
   expiryNote.textContent = "Le lien reste valide tant que le fichier existe sur Mega.";
   if (downloadView) downloadView.hidden = true;
@@ -207,6 +210,9 @@ function handleFile(file) {
     if (!event.lengthComputable) return;
     const pct = Math.round((event.loaded / event.total) * 100);
     progressBar.style.width = `${pct}%`;
+    if (dropzone) {
+      dropzone.style.setProperty("--progress", `${pct}%`);
+    }
     uploadStatus.textContent = `Envoi en cours... ${pct}%`;
   });
   xhr.addEventListener("load", () => {

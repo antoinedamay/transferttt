@@ -153,30 +153,99 @@ body {
 }
 
 .dropzone {
+  --progress: 0%;
+  position: relative;
   border: 2px dashed #3a405c;
-  border-radius: 20px;
-  padding: 56px 20px;
+  border-radius: 999px;
+  width: min(320px, 80vw);
+  height: min(320px, 80vw);
+  margin: 0 auto;
+  padding: 24px;
   text-align: center;
   background: rgba(13, 18, 32, 0.7);
   cursor: pointer;
+  display: grid;
+  place-items: center;
+  gap: 8px;
   transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.02);
+}
+
+.dropzone::before,
+.dropzone::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 176, 0, 0.4);
+  filter: blur(0.3px);
+  animation: orbit 8s linear infinite;
+}
+
+.dropzone::after {
+  width: 8px;
+  height: 8px;
+  background: rgba(0, 169, 255, 0.35);
+  animation-duration: 12s;
 }
 
 .dropzone:hover,
 .dropzone.dragover {
   border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
 }
 
 .dz-title {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
+  margin-top: 12px;
 }
 
 .dz-sub {
   color: var(--muted);
   margin-top: 6px;
+}
+
+.drop-ring {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) var(--progress), rgba(255, 255, 255, 0.08) 0);
+  mask: radial-gradient(circle, transparent 58%, #000 60%);
+  opacity: 0.9;
+  transition: background 0.2s ease;
+}
+
+.drop-core {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 30px rgba(255, 176, 0, 0.15);
+  position: relative;
+  z-index: 2;
+}
+
+.drop-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, #ffe08a, #ff8a00);
+  color: #2a1a00;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  font-weight: 700;
+  box-shadow: 0 12px 24px var(--glow);
+  transition: transform 0.2s ease;
+}
+
+.dropzone:hover .drop-icon {
+  transform: scale(1.05);
 }
 
 #fileInput { display: none; }
@@ -359,5 +428,17 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes orbit {
+  0% {
+    transform: translate(-130px, -140px);
+  }
+  50% {
+    transform: translate(140px, 120px);
+  }
+  100% {
+    transform: translate(-130px, -140px);
   }
 }
