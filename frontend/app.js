@@ -12,6 +12,7 @@ const uploadStatus = document.getElementById("uploadStatus");
 const resultBox = document.getElementById("result");
 const downloadLink = document.getElementById("downloadLink");
 const copyBtn = document.getElementById("copyBtn");
+const copyEmailBtn = document.getElementById("copyEmailBtn");
 const openBtn = document.getElementById("openBtn");
 const newBtn = document.getElementById("newBtn");
 const expiryNote = document.getElementById("expiryNote");
@@ -41,6 +42,7 @@ let currentDownloadUrl = null;
 let currentProgress = 0;
 let targetProgress = 0;
 let progressAnimId = null;
+let lastUploadMeta = null;
 
 const API_BASE = window.TRANSFER_API_BASE;
 const MAX_BYTES = 10 * 1024 * 1024 * 1024;
@@ -134,6 +136,7 @@ function resetUI() {
   if (uploadView) uploadView.hidden = false;
   if (startUploadBtn) startUploadBtn.disabled = true;
   pendingFile = null;
+  lastUploadMeta = null;
   currentDownloadUrl = null;
   if (downloadStage1) downloadStage1.hidden = false;
   if (downloadStage2) downloadStage2.hidden = true;
@@ -292,6 +295,12 @@ function startUpload(file) {
       resultBox.hidden = false;
       downloadLink.value = data.downloadUrl;
       openBtn.href = data.downloadUrl;
+      lastUploadMeta = {
+        name: file.name,
+        size: file.size,
+        expiresAt: data.expiresAt || null,
+        downloadUrl: data.downloadUrl
+      };
       if (data.expiresAt) {
         const date = new Date(data.expiresAt);
         expiryNote.textContent = `Lien valide jusqu'au ${date.toLocaleDateString("fr-FR")}.`;
@@ -413,6 +422,65 @@ copyBtn.addEventListener("click", async () => {
     showError("Copie impossible.");
   }
 });
+
+function buildEmailBody(meta) {
+  const lines = [];
+  lines.push("Bonjour,");
+  lines.push("");
+  lines.push("Voici votre fichier :");
+  lines.push(`Nom : ${meta.name}`);
+  if (meta.size != null) {
+    lines.push(`Poids : ${formatBytes(meta.size)}`);
+  }
+  if (meta.expiresAt) {
+    const date = new Date(meta.expiresAt);
+    lines.push(`Expire le : ${date.toLocaleDateString("fr-FR")}`);
+  }
+  lines.push(`Lien de téléchargement : ${meta.downloadUrl}`);
+  lines.push("");
+  lines.push("Bonne journée.");
+  return lines.join("\\n");
+}
+
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return true;
+    } catch (err2) {
+      document.body.removeChild(textarea);
+      return false;
+    }
+  }
+}
+
+if (copyEmailBtn) {
+  copyEmailBtn.addEventListener("click", async () => {
+    if (!lastUploadMeta) {
+      showError("Aucun fichier à copier pour l'instant.");
+      return;
+    }
+    const body = buildEmailBody(lastUploadMeta);
+    const ok = await copyToClipboard(body);
+    if (ok) {
+      const original = copyEmailBtn.textContent;
+      copyEmailBtn.textContent = "Copié";
+      setTimeout(() => (copyEmailBtn.textContent = original), 1500);
+    } else {
+      showError("Copie impossible.");
+    }
+  });
+}
 
 newBtn.addEventListener("click", () => {
   fileInput.value = "";
