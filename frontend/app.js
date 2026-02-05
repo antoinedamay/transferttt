@@ -434,8 +434,7 @@ function escapeHtml(value) {
 
 function buildEmailText(meta) {
   const lines = [];
-  lines.push("Votre lien est prêt");
-  lines.push(`Nom : ${meta.name}`);
+  lines.push(`${meta.name}`);
   if (meta.size != null) {
     lines.push(`Poids : ${formatBytes(meta.size)}`);
   }
@@ -458,13 +457,22 @@ function buildEmailHtml(meta) {
   return `
 <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;border-collapse:separate;border-spacing:0;font-family:'AntoineDisplay','Helvetica Neue',Helvetica,Arial,sans-serif;color:#111;letter-spacing:-0.01em;">
   <tr>
-    <td style="padding:22px 24px;border:1px solid #e3e3e3;border-radius:18px;background:#f7f7f7;">
-      <div style="font-size:18px;line-height:1.3;margin:0 0 10px 0;">Votre lien est prêt</div>
-      <div style="font-size:14px;line-height:1.5;margin:0 0 6px 0;">Nom&nbsp;: ${safeName}</div>
-      <div style="font-size:14px;line-height:1.5;margin:0 0 6px 0;">Poids&nbsp;: ${escapeHtml(size)}</div>
-      <div style="font-size:14px;line-height:1.5;margin:0 0 12px 0;">Expire le&nbsp;: ${escapeHtml(expires)}</div>
-      <a href="${safeUrl}" style="display:inline-block;padding:10px 18px;border-radius:999px;background:#ff4500;color:#111;text-decoration:none;font-size:14px;line-height:1.2;">Télécharger</a>
-      <div style="font-size:12px;line-height:1.5;margin:12px 0 0 0;color:#444;">Lien&nbsp;: <a href="${safeUrl}" style="color:#111;text-decoration:none;">${safeUrl}</a></div>
+    <td style="padding:18px 20px;border:1px solid #e3e3e3;border-radius:18px;background:#f7f7f7;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="width:60%;vertical-align:top;padding-right:14px;">
+            <div style="font-size:16px;line-height:1.35;margin:0 0 8px 0;">${safeName}</div>
+            <div style="font-size:13px;line-height:1.5;margin:0 0 4px 0;">Poids&nbsp;: ${escapeHtml(size)}</div>
+            <div style="font-size:13px;line-height:1.5;margin:0 0 4px 0;">Expire le&nbsp;: ${escapeHtml(expires)}</div>
+          </td>
+          <td style="width:40%;vertical-align:top;text-align:right;">
+            <a href="${safeUrl}" style="display:inline-block;padding:9px 14px;border-radius:999px;background:#ff4500;color:#111;text-decoration:none;font-size:13px;line-height:1.2;">Télécharger</a>
+            <div style="font-size:11px;line-height:1.5;margin:10px 0 0 0;color:#444;word-break:break-all;">
+              <a href="${safeUrl}" style="color:#111;text-decoration:none;">${safeUrl}</a>
+            </div>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
 </table>
