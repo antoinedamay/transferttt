@@ -531,6 +531,21 @@ body.uploading .drop-icon {
   box-shadow: 0 16px 30px rgba(25, 32, 45, 0.08);
 }
 
+.result.animate {
+  animation: result-pop 0.35s ease both;
+}
+
+@keyframes result-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .result-title {
   font-weight: 400;
   margin-bottom: 10px;
@@ -568,6 +583,12 @@ body.uploading .drop-icon {
 
 .result-actions a,
 .result-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  min-height: 38px;
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid #e5e7eb;
@@ -613,6 +634,15 @@ body.download-step-2 #downloadStage1 {
   place-items: center;
   gap: 16px;
   min-height: 60vh;
+}
+
+body.download-step-1 .page {
+  min-height: 100vh;
+  padding: 0 20px;
+}
+
+body.download-step-1 .download-stage {
+  min-height: 100vh;
 }
 
 .download-stage-two {

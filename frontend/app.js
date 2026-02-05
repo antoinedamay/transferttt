@@ -118,6 +118,7 @@ function resetUI() {
   if (mainCard) mainCard.classList.add("compact");
   uploadBox.hidden = true;
   resultBox.hidden = true;
+  resultBox.classList.remove("animate");
   errorBox.hidden = true;
   progressBar.style.width = "0%";
   if (dropzone) {
@@ -293,6 +294,9 @@ function startUpload(file) {
       uploadStatus.textContent = "Upload terminé";
       document.body.classList.remove("uploading");
       resultBox.hidden = false;
+      resultBox.classList.remove("animate");
+      void resultBox.offsetWidth;
+      resultBox.classList.add("animate");
       downloadLink.value = data.downloadUrl;
       openBtn.href = data.downloadUrl;
       lastUploadMeta = {
