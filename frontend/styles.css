@@ -676,7 +676,7 @@ body.download-step-1 #downloadStage1 .download-bubble {
 .download-bubble {
   background: rgba(255, 255, 255, 0.6);
   color: #1f2430;
-  padding: 12px 16px;
+  padding: 12px 20px;
   border-radius: 12px;
   box-shadow: var(--soft-shadow);
   text-align: center;
@@ -684,6 +684,8 @@ body.download-step-1 #downloadStage1 .download-bubble {
   border: 1px solid rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px) saturate(150%);
   -webkit-backdrop-filter: blur(12px) saturate(150%);
+  min-width: 220px;
+  max-width: 320px;
 }
 
 .bubble-title {
