@@ -660,7 +660,7 @@ body.download-step-1 #downloadStage1 .download-circle {
 body.download-step-1 #downloadStage1 .download-bubble {
   position: absolute;
   left: 50%;
-  top: calc(50% - (var(--circle-size) / 2) - 16px);
+  top: calc(50% - (var(--circle-size) / 2) - 26px);
   transform: translate(-50%, -100%);
 }
 
