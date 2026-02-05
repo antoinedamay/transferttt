@@ -316,6 +316,7 @@ body.compact .card {
   position: relative;
   display: grid;
   place-items: center;
+  z-index: 2;
 }
 
 .drop-tooltip {
@@ -323,16 +324,23 @@ body.compact .card {
   bottom: -32px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.65);
-  color: rgba(31, 36, 48, 0.7);
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(31, 36, 48, 0.8);
   font-weight: 400;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
-  box-shadow: 0 6px 14px rgba(25, 32, 45, 0.12);
-  font-size: 10.5px;
+  box-shadow: 0 8px 18px rgba(25, 32, 45, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  font-size: 11px;
   opacity: 0;
   transition: opacity 0.2s ease;
   white-space: nowrap;
+  max-width: 240px;
+  text-align: center;
+  line-height: 1.1;
+  z-index: 4;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 body.compact .drop-tooltip {
@@ -359,6 +367,7 @@ body.compact .drop-tooltip {
   transition: transform 0.2s, box-shadow 0.2s;
   overflow: visible;
   transform: translateZ(0);
+  z-index: 1;
 }
 
 .dropzone::before,
@@ -848,11 +857,11 @@ body.download-step-2 #downloadStage1 {
 
   .drop-tooltip {
     white-space: normal;
-    max-width: calc(100vw - 60px);
+    max-width: 240px;
     text-align: center;
-    font-size: 10px;
-    padding: 4px 8px;
-    bottom: -28px;
+    font-size: 11px;
+    padding: 6px 12px;
+    bottom: -30px;
   }
 
   .download-bubble {
