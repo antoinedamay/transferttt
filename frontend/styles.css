@@ -30,7 +30,7 @@ body {
     radial-gradient(1200px 800px at 10% 20%, rgba(255, 59, 48, 0.28) 0%, transparent 70%),
     radial-gradient(900px 700px at 80% 20%, rgba(63, 111, 255, 0.28) 0%, transparent 70%),
     radial-gradient(900px 700px at 45% 85%, rgba(22, 224, 189, 0.28) 0%, transparent 70%),
-    linear-gradient(120deg, #f7e2d3 0%, #f6e8d4 35%, #d8e6ff 70%, #d5f2ec 100%);
+    rgb(231, 231, 231);
   color: var(--text);
   min-height: 100vh;
 }
@@ -771,12 +771,12 @@ body.download-step-2 #downloadStage1 {
 }
 
 @keyframes gradientMove {
-  0% { background-position: 0% 30%; transform: scale(1); }
-  20% { background-position: 40% 20%; transform: scale(1.02); }
-  40% { background-position: 80% 50%; transform: scale(1.01); }
-  60% { background-position: 60% 80%; transform: scale(1.03); }
-  80% { background-position: 20% 60%; transform: scale(1.01); }
-  100% { background-position: 0% 30%; transform: scale(1); }
+  0% { background-position: 0% 30%; }
+  20% { background-position: 40% 20%; }
+  40% { background-position: 80% 50%; }
+  60% { background-position: 60% 80%; }
+  80% { background-position: 20% 60%; }
+  100% { background-position: 0% 30%; }
 }
 
 @keyframes wave {
