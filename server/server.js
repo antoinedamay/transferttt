@@ -39,6 +39,7 @@ const ALLOW_LEGACY_TOKENS = process.env.ALLOW_LEGACY_TOKENS === "true";
 const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || "600000", 10);
 const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || "20", 10);
 const MAX_TIMER_DELAY = 2147483647;
+const UPLOAD_SESSION_TTL_MS = parseInt(process.env.UPLOAD_SESSION_TTL_MS || "3600000", 10);
 
 const defaultOrigins = [];
 try {
@@ -57,6 +58,7 @@ const allowedOrigins = new Set(
 );
 
 const rateStore = new Map();
+const uploadSessions = new Map();
 
 let storagePromise = null;
 
@@ -111,6 +113,57 @@ function generateShortCode(length) {
     out += alphabet[bytes[i] % alphabet.length];
   }
   return out;
+}
+
+function createUploadSession() {
+  const id = crypto.randomBytes(12).toString("hex");
+  const now = Date.now();
+  const session = {
+    id,
+    createdAt: now,
+    updatedAt: now,
+    expiresAt: now + UPLOAD_SESSION_TTL_MS,
+    phase: "init",
+    receivedBytes: 0,
+    totalBytes: 0,
+    megaBytes: 0,
+    megaTotal: 0,
+    name: null,
+    size: null,
+    downloadUrl: null,
+    expiresAtIso: null,
+    error: null,
+    done: false
+  };
+  uploadSessions.set(id, session);
+  return session;
+}
+
+function getUploadSession(id) {
+  if (!id) return null;
+  const session = uploadSessions.get(id);
+  if (!session) return null;
+  if (Date.now() > session.expiresAt) {
+    uploadSessions.delete(id);
+    return null;
+  }
+  return session;
+}
+
+function serializeUploadSession(session) {
+  return {
+    phase: session.phase,
+    receivedBytes: session.receivedBytes,
+    totalBytes: session.totalBytes,
+    megaBytes: session.megaBytes,
+    megaTotal: session.megaTotal,
+    name: session.name,
+    size: session.size,
+    downloadUrl: session.downloadUrl,
+    expiresAt: session.expiresAtIso,
+    error: session.error,
+    done: session.done
+  };
 }
 
 function payloadToSignString(payload) {
@@ -210,6 +263,20 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
+app.post("/api/upload/init", rateLimit, (req, res) => {
+  const session = createUploadSession();
+  res.json({ uploadId: session.id });
+});
+
+app.get("/api/upload/status/:id", (req, res) => {
+  const session = getUploadSession(req.params.id);
+  if (!session) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
+  res.json(serializeUploadSession(session));
+});
+
 function rateLimit(req, res, next) {
   const ip = (req.headers["x-forwarded-for"] || req.ip || "").split(",")[0].trim() || "unknown";
   const now = Date.now();
@@ -300,6 +367,22 @@ app.post("/api/upload", rateLimit, (req, res) => {
   let originalName = null;
   let writeStream = null;
   let expiresInDays = 30;
+  let sessionId = null;
+  let session = null;
+  let receivedBytes = 0;
+
+  const ensureSession = () => {
+    if (session) return session;
+    if (!sessionId) return null;
+    session = getUploadSession(sessionId);
+    if (session) {
+      session.updatedAt = Date.now();
+      session.receivedBytes = receivedBytes;
+      session.phase = "uploading";
+      if (originalName) session.name = originalName;
+    }
+    return session;
+  };
 
   busboy.on("file", (name, file, info) => {
     originalName = info.filename || `file-${Date.now()}`;
@@ -308,6 +391,20 @@ app.post("/api/upload", rateLimit, (req, res) => {
     tempPath = path.join(os.tmpdir(), `${Date.now()}-${rand}-${safeName}`);
     writeStream = fs.createWriteStream(tempPath);
     file.pipe(writeStream);
+    const current = ensureSession();
+    if (current) {
+      current.name = originalName;
+      current.phase = "uploading";
+    }
+
+    file.on("data", (chunk) => {
+      receivedBytes += chunk.length;
+      const active = ensureSession();
+      if (active) {
+        active.receivedBytes = receivedBytes;
+        active.updatedAt = Date.now();
+      }
+    });
 
     file.on("limit", () => {
       res.status(413).json({ error: "File too large" });
@@ -323,6 +420,10 @@ app.post("/api/upload", rateLimit, (req, res) => {
     }
     if (name === "customSlug") {
       req.customSlug = value;
+    }
+    if (name === "uploadId") {
+      sessionId = value;
+      ensureSession();
     }
   });
 
@@ -345,12 +446,27 @@ app.post("/api/upload", rateLimit, (req, res) => {
 
     try {
       const stats = fs.statSync(tempPath);
+      const activeSession = ensureSession();
+      if (activeSession) {
+        activeSession.totalBytes = stats.size;
+        activeSession.size = stats.size;
+        activeSession.name = originalName;
+        activeSession.phase = "mega";
+        activeSession.megaTotal = stats.size;
+        activeSession.megaBytes = 0;
+        activeSession.updatedAt = Date.now();
+      }
       let storage;
       try {
         storage = await getStorage();
       } catch (err) {
         console.error("Mega auth error:", err);
         res.status(500).json({ error: "Mega auth failed" });
+        if (activeSession) {
+          activeSession.phase = "error";
+          activeSession.error = "Mega auth failed";
+          activeSession.updatedAt = Date.now();
+        }
         fs.unlink(tempPath, () => {});
         return;
       }
@@ -360,6 +476,20 @@ app.post("/api/upload", rateLimit, (req, res) => {
       upload.on("error", () => {
         console.error("Mega upload error");
         res.status(500).json({ error: "Mega upload failed" });
+        if (activeSession) {
+          activeSession.phase = "error";
+          activeSession.error = "Mega upload failed";
+          activeSession.updatedAt = Date.now();
+        }
+      });
+
+      upload.on("progress", (progress) => {
+        if (!activeSession || !progress) return;
+        const total = progress.bytesTotal || stats.size;
+        const uploaded = progress.bytesUploaded || progress.bytesLoaded || 0;
+        activeSession.megaTotal = total;
+        activeSession.megaBytes = uploaded;
+        activeSession.updatedAt = Date.now();
       });
 
       upload.on("complete", async (file) => {
@@ -426,6 +556,13 @@ app.post("/api/upload", rateLimit, (req, res) => {
           downloadUrl,
           expiresAt: expiresAt.toISOString()
         });
+        if (activeSession) {
+          activeSession.phase = "done";
+          activeSession.done = true;
+          activeSession.downloadUrl = downloadUrl;
+          activeSession.expiresAtIso = expiresAt.toISOString();
+          activeSession.updatedAt = Date.now();
+        }
         if (payload.id) {
           scheduleDeletion(payload.id, expiresAt.toISOString());
         }

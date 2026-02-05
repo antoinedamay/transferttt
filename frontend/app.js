@@ -9,6 +9,9 @@ const fileNameEl = document.getElementById("fileName");
 const fileSizeEl = document.getElementById("fileSize");
 const progressBar = document.getElementById("progressBar");
 const uploadStatus = document.getElementById("uploadStatus");
+const megaProgress = document.getElementById("megaProgress");
+const megaProgressBar = document.getElementById("megaProgressBar");
+const megaStatus = document.getElementById("megaStatus");
 const resultBox = document.getElementById("result");
 const downloadLink = document.getElementById("downloadLink");
 const copyBtn = document.getElementById("copyBtn");
@@ -43,6 +46,8 @@ let currentProgress = 0;
 let targetProgress = 0;
 let progressAnimId = null;
 let lastUploadMeta = null;
+let uploadSessionId = null;
+let megaPollTimer = null;
 
 const API_BASE = window.TRANSFER_API_BASE;
 const MAX_BYTES = 10 * 1024 * 1024 * 1024;
@@ -109,6 +114,67 @@ function decodeTokenPayload(token) {
   }
 }
 
+async function initUploadSession() {
+  try {
+    const res = await fetch(`${API_BASE}/api/upload/init`, { method: "POST" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && data.uploadId ? data.uploadId : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+function stopMegaPolling() {
+  if (megaPollTimer) {
+    clearInterval(megaPollTimer);
+    megaPollTimer = null;
+  }
+}
+
+function updateMegaProgress(pct) {
+  const safePct = Math.min(100, Math.max(0, pct));
+  if (megaProgressBar) {
+    megaProgressBar.style.width = `${safePct}%`;
+  }
+}
+
+function startMegaPolling(id) {
+  if (!id) return;
+  uploadSessionId = id;
+  stopMegaPolling();
+  const poll = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/upload/status/${id}`, { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.error) {
+        showError(data.error);
+        stopMegaPolling();
+        return;
+      }
+      if (data.phase === "mega" || data.phase === "done") {
+        if (megaProgress) megaProgress.hidden = false;
+        if (megaStatus) megaStatus.hidden = false;
+        const total = data.megaTotal || data.size || 0;
+        const loaded = data.megaBytes || 0;
+        const pct = total ? (loaded / total) * 100 : 0;
+        updateMegaProgress(pct);
+        if (megaStatus) {
+          megaStatus.textContent = `Transfert vers Mega... ${Math.round(pct)}%`;
+        }
+      }
+      if (data.phase === "done") {
+        stopMegaPolling();
+      }
+    } catch (err) {
+      // ignore transient polling errors
+    }
+  };
+  poll();
+  megaPollTimer = setInterval(poll, 700);
+}
+
 function resetUI() {
   document.body.classList.add("compact");
   document.body.classList.remove("download-mode");
@@ -123,6 +189,9 @@ function resetUI() {
   resultBox.classList.remove("animate");
   errorBox.hidden = true;
   progressBar.style.width = "0%";
+  if (megaProgressBar) megaProgressBar.style.width = "0%";
+  if (megaProgress) megaProgress.hidden = true;
+  if (megaStatus) megaStatus.hidden = true;
   if (dropzone) {
     dropzone.style.setProperty("--progress", "0%");
   }
@@ -134,6 +203,7 @@ function resetUI() {
     progressAnimId = null;
   }
   uploadStatus.textContent = "En attente...";
+  if (megaStatus) megaStatus.textContent = "Transfert vers Mega...";
   expiryNote.textContent = "Le lien reste valide tant que le fichier existe sur Mega.";
   if (downloadView) downloadView.hidden = true;
   if (uploadView) uploadView.hidden = false;
@@ -141,6 +211,8 @@ function resetUI() {
   pendingFile = null;
   lastUploadMeta = null;
   currentDownloadUrl = null;
+  uploadSessionId = null;
+  stopMegaPolling();
   if (downloadStage1) downloadStage1.hidden = false;
   if (downloadStage2) downloadStage2.hidden = true;
   if (carouselTimer) {
@@ -259,12 +331,15 @@ function prepareFile(file) {
   if (startUploadBtn) startUploadBtn.disabled = false;
 }
 
-function startUpload(file) {
+async function startUpload(file) {
   if (!file) return;
   document.body.classList.add("uploading");
   uploadBox.hidden = false;
   fileNameEl.textContent = file.name;
   fileSizeEl.textContent = formatBytes(file.size);
+  if (megaProgress) megaProgress.hidden = true;
+  if (megaStatus) megaStatus.hidden = true;
+  if (megaProgressBar) megaProgressBar.style.width = "0%";
 
   const expiresInDays = parseInt(expirySelect.value, 10);
   const customSlug = normalizeSlug(customSlugInput ? customSlugInput.value : "");
@@ -273,6 +348,11 @@ function startUpload(file) {
   formData.append("expiresInDays", String(expiresInDays));
   if (customSlug) {
     formData.append("customSlug", customSlug);
+  }
+  const initId = await initUploadSession();
+  if (initId) {
+    formData.append("uploadId", initId);
+    startMegaPolling(initId);
   }
 
   const xhr = new XMLHttpRequest();
@@ -286,6 +366,11 @@ function startUpload(file) {
     }
     uploadStatus.textContent = `Envoi en cours... ${Math.round(pct)}%`;
   });
+  xhr.upload.addEventListener("load", () => {
+    uploadStatus.textContent = "Fichier envoyé. Transfert vers Mega...";
+    if (megaProgress) megaProgress.hidden = false;
+    if (megaStatus) megaStatus.hidden = false;
+  });
   xhr.addEventListener("load", () => {
     if (xhr.status >= 200 && xhr.status < 300) {
       const data = JSON.parse(xhr.responseText);
@@ -295,6 +380,7 @@ function startUpload(file) {
       }
       uploadStatus.textContent = "Upload terminé";
       document.body.classList.remove("uploading");
+      stopMegaPolling();
       resultBox.hidden = false;
       resultBox.classList.remove("animate");
       void resultBox.offsetWidth;
@@ -313,6 +399,7 @@ function startUpload(file) {
       }
     } else {
       document.body.classList.remove("uploading");
+      stopMegaPolling();
       try {
         const data = JSON.parse(xhr.responseText || "{}");
         if (data && data.error) {
@@ -327,10 +414,12 @@ function startUpload(file) {
   });
   xhr.addEventListener("error", () => {
     document.body.classList.remove("uploading");
+    stopMegaPolling();
     showError("Impossible de contacter le serveur.");
   });
   xhr.addEventListener("timeout", () => {
     document.body.classList.remove("uploading");
+    stopMegaPolling();
     showError("Temps dépassé. Réessaie.");
   });
 

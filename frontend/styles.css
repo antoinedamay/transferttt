@@ -511,6 +511,15 @@ body.uploading .drop-icon {
   overflow: hidden;
 }
 
+.progress.mega {
+  margin-top: 10px;
+  background: rgba(229, 231, 235, 0.7);
+}
+
+.progress.mega .progress-bar {
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+}
+
 .progress-bar {
   height: 100%;
   width: 0%;
@@ -521,6 +530,11 @@ body.uploading .drop-icon {
 .upload-status {
   margin-top: 8px;
   color: var(--muted);
+}
+
+.upload-status.mega {
+  margin-top: 6px;
+  font-size: 12px;
 }
 
 .result {
