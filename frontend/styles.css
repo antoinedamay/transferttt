@@ -833,6 +833,7 @@ body.download-step-2 #downloadStage1 {
   .topbar {
     flex-direction: column;
     align-items: flex-start;
+    gap: 4px;
   }
 
   .top-actions {
@@ -849,6 +850,14 @@ body.download-step-2 #downloadStage1 {
     white-space: normal;
     max-width: calc(100vw - 60px);
     text-align: center;
+    font-size: 10px;
+    padding: 4px 8px;
+    bottom: -28px;
+  }
+
+  .download-bubble {
+    transform: scale(0.95);
+    transform-origin: center;
   }
 
   .footer-links {
