@@ -38,6 +38,7 @@ const TOKEN_SECRET = process.env.TOKEN_SECRET;
 const ALLOW_LEGACY_TOKENS = process.env.ALLOW_LEGACY_TOKENS === "true";
 const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || "600000", 10);
 const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || "20", 10);
+const MAX_TIMER_DELAY = 2147483647;
 
 const defaultOrigins = [];
 try {
@@ -117,7 +118,8 @@ function payloadToSignString(payload) {
   const exp = payload && payload.exp ? String(payload.exp) : "";
   const name = payload && payload.name ? String(payload.name) : "";
   const size = payload && payload.size != null ? String(payload.size) : "";
-  return [link, exp, name, size].join("|");
+  const id = payload && payload.id ? String(payload.id) : "";
+  return [link, exp, name, size, id].join("|");
 }
 
 function hmacSign(value) {
@@ -232,6 +234,45 @@ function rateLimit(req, res, next) {
   next();
 }
 
+async function deleteMegaFileById(nodeId) {
+  if (!nodeId) return false;
+  try {
+    const storage = await getStorage();
+    let file = storage.files ? storage.files[nodeId] : null;
+    if (!file && typeof storage.reload === "function") {
+      await new Promise((resolve, reject) => {
+        storage.reload(true, (err) => (err ? reject(err) : resolve()));
+      }).catch(() => {});
+      file = storage.files ? storage.files[nodeId] : null;
+    }
+    if (!file || typeof file.delete !== "function") return false;
+    return await new Promise((resolve) => {
+      file.delete(true, (err) => resolve(!err));
+    });
+  } catch (err) {
+    return false;
+  }
+}
+
+function scheduleDeletion(nodeId, expiresAt) {
+  if (!nodeId || !expiresAt) return;
+  const target = new Date(expiresAt).getTime();
+  if (!Number.isFinite(target)) return;
+  const delay = target - Date.now();
+  if (delay <= 0) {
+    deleteMegaFileById(nodeId);
+    return;
+  }
+  const step = Math.min(delay, MAX_TIMER_DELAY);
+  setTimeout(() => {
+    if (delay > MAX_TIMER_DELAY) {
+      scheduleDeletion(nodeId, expiresAt);
+      return;
+    }
+    deleteMegaFileById(nodeId);
+  }, step);
+}
+
 app.get("/api/health", (req, res) => {
   res.json({
     ok: true,
@@ -329,7 +370,8 @@ app.post("/api/upload", rateLimit, (req, res) => {
           link,
           exp: expiresAt.toISOString(),
           name: originalName,
-          size: stats.size
+          size: stats.size,
+          id: file.nodeId || file.handle || null
         };
         let tokenData = signPayload(payload);
         if (!tokenData) {
@@ -384,6 +426,9 @@ app.post("/api/upload", rateLimit, (req, res) => {
           downloadUrl,
           expiresAt: expiresAt.toISOString()
         });
+        if (payload.id) {
+          scheduleDeletion(payload.id, expiresAt.toISOString());
+        }
         fs.unlink(tempPath, () => {});
       });
     } catch (err) {
@@ -409,6 +454,9 @@ app.get("/api/info/:token", async (req, res) => {
       return;
     }
     if (exp && Number.isFinite(exp.getTime()) && Date.now() > exp.getTime()) {
+      if (payload.id) {
+        deleteMegaFileById(payload.id);
+      }
       res.status(410).json({ error: "Expired" });
       return;
     }
@@ -448,6 +496,9 @@ async function handleDownload(token, res) {
       return;
     }
     if (exp && Number.isFinite(exp.getTime()) && Date.now() > exp.getTime()) {
+      if (payload.id) {
+        deleteMegaFileById(payload.id);
+      }
       res.status(410).send("Lien expiré");
       return;
     }
