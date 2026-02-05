@@ -24,6 +24,7 @@ if (!globalThis.crypto.getRandomValues) {
 }
 
 const app = express();
+app.set("trust proxy", 1);
 
 const PORT = process.env.PORT || 5050;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
@@ -33,6 +34,28 @@ const ALLOWED_EXPIRY_DAYS = [1, 7, 30, 90];
 const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 const SHORT_CODE_LEN = parseInt(process.env.SHORT_CODE_LEN || "8", 10);
+const TOKEN_SECRET = process.env.TOKEN_SECRET;
+const ALLOW_LEGACY_TOKENS = process.env.ALLOW_LEGACY_TOKENS === "true";
+const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || "600000", 10);
+const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX || "20", 10);
+
+const defaultOrigins = [];
+try {
+  defaultOrigins.push(new URL(PUBLIC_BASE_URL).origin);
+} catch (err) {
+  // ignore invalid URL
+}
+defaultOrigins.push("http://localhost:3000", "http://localhost:5173", "http://localhost:8080");
+const originEnv = process.env.CORS_ORIGINS || "";
+const allowedOrigins = new Set(
+  originEnv
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .concat(defaultOrigins)
+);
+
+const rateStore = new Map();
 
 let storagePromise = null;
 
@@ -57,9 +80,13 @@ function base64UrlEncode(input) {
 }
 
 function base64UrlDecode(token) {
-  const pad = token.length % 4 === 0 ? "" : "=".repeat(4 - (token.length % 4));
-  const json = Buffer.from(token.replace(/-/g, "+").replace(/_/g, "/") + pad, "base64").toString("utf8");
-  return JSON.parse(json);
+  try {
+    const pad = token.length % 4 === 0 ? "" : "=".repeat(4 - (token.length % 4));
+    const json = Buffer.from(token.replace(/-/g, "+").replace(/_/g, "/") + pad, "base64").toString("utf8");
+    return JSON.parse(json);
+  } catch (err) {
+    return null;
+  }
 }
 
 function sanitizeFilename(name) {
@@ -83,6 +110,41 @@ function generateShortCode(length) {
     out += alphabet[bytes[i] % alphabet.length];
   }
   return out;
+}
+
+function payloadToSignString(payload) {
+  const link = payload && payload.link ? String(payload.link) : "";
+  const exp = payload && payload.exp ? String(payload.exp) : "";
+  const name = payload && payload.name ? String(payload.name) : "";
+  const size = payload && payload.size != null ? String(payload.size) : "";
+  return [link, exp, name, size].join("|");
+}
+
+function hmacSign(value) {
+  if (!TOKEN_SECRET) return null;
+  return crypto
+    .createHmac("sha256", TOKEN_SECRET)
+    .update(value)
+    .digest("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function signPayload(payload) {
+  const signature = hmacSign(payloadToSignString(payload));
+  if (!signature) return null;
+  return { payload, sig: signature };
+}
+
+function verifySignedPayload(data) {
+  if (!data || !data.payload || !data.sig || !TOKEN_SECRET) return null;
+  const expected = hmacSign(payloadToSignString(data.payload));
+  if (!expected) return null;
+  const a = Buffer.from(expected);
+  const b = Buffer.from(data.sig);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  return data.payload;
 }
 
 async function kvGet(key) {
@@ -122,10 +184,53 @@ async function resolveToken(token) {
     if (!data) return null;
     return data;
   }
-  return base64UrlDecode(token);
+  const decoded = base64UrlDecode(token);
+  if (!decoded) return null;
+  const verified = verifySignedPayload(decoded);
+  if (verified) return verified;
+  if (ALLOW_LEGACY_TOKENS && decoded.link) return decoded;
+  return null;
 }
 
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.has(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS"), false);
+  }
+}));
+
+app.use((err, req, res, next) => {
+  if (err && err.message && err.message.includes("CORS")) {
+    res.status(403).json({ error: "Origine non autorisée." });
+    return;
+  }
+  next(err);
+});
+
+function rateLimit(req, res, next) {
+  const ip = (req.headers["x-forwarded-for"] || req.ip || "").split(",")[0].trim() || "unknown";
+  const now = Date.now();
+  const entry = rateStore.get(ip);
+  if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
+    rateStore.set(ip, { start: now, count: 1 });
+    return next();
+  }
+  entry.count += 1;
+  if (entry.count > RATE_LIMIT_MAX) {
+    res.status(429).json({ error: "Trop de requêtes. Réessayez plus tard." });
+    return;
+  }
+  rateStore.set(ip, entry);
+  if (rateStore.size > 2000) {
+    for (const [key, value] of rateStore.entries()) {
+      if (now - value.start > RATE_LIMIT_WINDOW_MS) {
+        rateStore.delete(key);
+      }
+    }
+  }
+  next();
+}
 
 app.get("/api/health", (req, res) => {
   res.json({
@@ -135,9 +240,13 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-app.post("/api/upload", (req, res) => {
+app.post("/api/upload", rateLimit, (req, res) => {
   if (!process.env.MEGA_EMAIL || !process.env.MEGA_PASSWORD) {
     res.status(500).json({ error: "MEGA credentials missing" });
+    return;
+  }
+  if (!(UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN) && !TOKEN_SECRET) {
+    res.status(500).json({ error: "TOKEN_SECRET missing" });
     return;
   }
 
@@ -216,7 +325,19 @@ app.post("/api/upload", (req, res) => {
         const link = await file.link();
         const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
         const base = PUBLIC_BASE_URL.endsWith("/") ? PUBLIC_BASE_URL.slice(0, -1) : PUBLIC_BASE_URL;
-        let token = base64UrlEncode({ link, exp: expiresAt.toISOString() });
+        const payload = {
+          link,
+          exp: expiresAt.toISOString(),
+          name: originalName,
+          size: stats.size
+        };
+        let tokenData = signPayload(payload);
+        if (!tokenData) {
+          res.status(500).json({ error: "Token signing failed" });
+          fs.unlink(tempPath, () => {});
+          return;
+        }
+        let token = base64UrlEncode(tokenData);
         let downloadUrl = `${base}/${token}`;
 
         if (UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN) {
@@ -247,12 +368,7 @@ app.post("/api/upload", (req, res) => {
             }
           }
           if (shortCode) {
-            const stored = {
-              link,
-              exp: expiresAt.toISOString(),
-              name: originalName,
-              size: stats.size
-            };
+            const stored = payload;
             const ttlSeconds = Math.max(1, Math.floor((expiresAt.getTime() - Date.now()) / 1000));
             const storedOk = await kvSet(shortCode, stored, ttlSeconds);
             if (storedOk) {

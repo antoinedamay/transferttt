@@ -15,3 +15,17 @@ services:
         sync: false
       - key: BASE_URL
         sync: false
+      - key: TOKEN_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: RATE_LIMIT_WINDOW_MS
+        sync: false
+      - key: RATE_LIMIT_MAX
+        sync: false
+      - key: ALLOW_LEGACY_TOKENS
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false

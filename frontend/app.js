@@ -101,7 +101,9 @@ function decodeTokenPayload(token) {
     const padded = token.replace(/-/g, "+").replace(/_/g, "/");
     const pad = padded.length % 4 === 0 ? "" : "=".repeat(4 - (padded.length % 4));
     const json = atob(padded + pad);
-    return JSON.parse(json);
+    const data = JSON.parse(json);
+    if (data && data.payload) return data.payload;
+    return data;
   } catch (err) {
     return null;
   }
