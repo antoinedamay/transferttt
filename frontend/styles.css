@@ -7,10 +7,10 @@
 }
 
 :root {
-  --bg-1: #ed5a66;
-  --bg-2: #f3a05f;
-  --bg-3: #5c7bda;
-  --bg-4: #4aa5a2;
+  --bg-1: #ff3b30;
+  --bg-2: #ff8f1f;
+  --bg-3: #3f6fff;
+  --bg-4: #16e0bd;
   --card: #ffffff;
   --text: #1f2430;
   --muted: #6b7280;
@@ -27,10 +27,10 @@ body {
   margin: 0;
   font-family: "AntoineDisplay", "Outfit", "Space Grotesk", "Poppins", "Avenir Next", sans-serif;
   background:
-    radial-gradient(1200px 800px at 10% 20%, rgba(237, 90, 102, 0.25) 0%, transparent 70%),
-    radial-gradient(900px 700px at 80% 20%, rgba(92, 123, 218, 0.25) 0%, transparent 70%),
-    radial-gradient(900px 700px at 45% 85%, rgba(243, 160, 95, 0.25) 0%, transparent 70%),
-    linear-gradient(120deg, #f6e3d6 0%, #f6eadc 35%, #dce5f4 70%, #d6eee8 100%);
+    radial-gradient(1200px 800px at 10% 20%, rgba(255, 59, 48, 0.28) 0%, transparent 70%),
+    radial-gradient(900px 700px at 80% 20%, rgba(63, 111, 255, 0.28) 0%, transparent 70%),
+    radial-gradient(900px 700px at 45% 85%, rgba(22, 224, 189, 0.28) 0%, transparent 70%),
+    linear-gradient(120deg, #f7e2d3 0%, #f6e8d4 35%, #d8e6ff 70%, #d5f2ec 100%);
   color: var(--text);
   min-height: 100vh;
 }
@@ -41,7 +41,7 @@ body::before {
   inset: -12%;
   background: linear-gradient(120deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 70%, var(--bg-4) 100%);
   background-size: 200% 200%;
-  animation: gradientMove 16s ease-in-out infinite;
+  animation: gradientMove 18s steps(6, end) infinite;
   mask-image: url("assets/fond.svg");
   mask-size: cover;
   mask-position: center;
@@ -771,9 +771,12 @@ body.download-step-2 #downloadStage1 {
 }
 
 @keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% { background-position: 0% 30%; transform: scale(1); }
+  20% { background-position: 40% 20%; transform: scale(1.02); }
+  40% { background-position: 80% 50%; transform: scale(1.01); }
+  60% { background-position: 60% 80%; transform: scale(1.03); }
+  80% { background-position: 20% 60%; transform: scale(1.01); }
+  100% { background-position: 0% 30%; transform: scale(1); }
 }
 
 @keyframes wave {
