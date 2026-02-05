@@ -845,6 +845,10 @@ body.download-step-2 #downloadStage1 {
     gap: 4px;
   }
 
+  .brand-right {
+    margin-top: -6px;
+  }
+
   .top-actions {
     width: 100%;
     justify-content: flex-start;
@@ -856,8 +860,8 @@ body.download-step-2 #downloadStage1 {
   }
 
   .drop-tooltip {
-    white-space: normal;
-    max-width: 240px;
+    white-space: nowrap;
+    max-width: none;
     text-align: center;
     font-size: 11px;
     padding: 6px 12px;
