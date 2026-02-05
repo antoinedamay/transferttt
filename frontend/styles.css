@@ -26,13 +26,28 @@
 body {
   margin: 0;
   font-family: "AntoineDisplay", "Outfit", "Space Grotesk", "Poppins", "Avenir Next", sans-serif;
-  background:
-    radial-gradient(1200px 800px at 10% 20%, rgba(237, 90, 102, 0.85) 0%, rgba(237, 90, 102, 0.2) 45%, transparent 70%),
-    radial-gradient(900px 700px at 80% 20%, rgba(92, 123, 218, 0.85) 0%, rgba(92, 123, 218, 0.25) 50%, transparent 70%),
-    radial-gradient(900px 700px at 45% 85%, rgba(243, 160, 95, 0.9) 0%, rgba(243, 160, 95, 0.4) 48%, transparent 70%),
-    linear-gradient(120deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 70%, var(--bg-4) 100%);
+  background: #f6f2eb;
   color: var(--text);
   min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: -12%;
+  background: linear-gradient(120deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 70%, var(--bg-4) 100%);
+  background-size: 200% 200%;
+  animation: gradientMove 16s ease-in-out infinite;
+  mask-image: url("https://antoinedamay.fr/images/transfert/fond.svg");
+  mask-size: cover;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: url("https://antoinedamay.fr/images/transfert/fond.svg");
+  -webkit-mask-size: cover;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
 }
 
 button,
@@ -46,6 +61,8 @@ textarea {
   max-width: 1100px;
   margin: 0 auto;
   padding: 120px 20px 90px;
+  position: relative;
+  z-index: 1;
 }
 
 body.centered .page {
@@ -154,6 +171,7 @@ body.compact .page {
   overflow: hidden;
   animation: rise 0.8s ease both;
   width: min(980px, 92vw);
+  z-index: 1;
 }
 
 body.download-step-1 .card {
@@ -746,6 +764,12 @@ body.download-step-2 #downloadStage1 {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 @keyframes wave {
