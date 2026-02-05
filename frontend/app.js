@@ -467,8 +467,12 @@ function buildEmailHtml(meta) {
           </td>
           <td style="width:40%;vertical-align:top;text-align:right;">
             <a href="${safeUrl}" style="display:inline-block;padding:9px 14px;border-radius:999px;background:#ff4500;color:#111;text-decoration:none;font-size:13px;line-height:1.2;">Télécharger</a>
-            <div style="font-size:11px;line-height:1.5;margin:10px 0 0 0;color:#444;word-break:break-all;">
-              <a href="${safeUrl}" style="color:#111;text-decoration:none;">${safeUrl}</a>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding-top:10px;">
+            <div style="font-size:11px;line-height:1.4;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              <a href="${safeUrl}" style="color:#111;text-decoration:none;white-space:nowrap;">${safeUrl}</a>
             </div>
           </td>
         </tr>
