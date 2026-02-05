@@ -321,7 +321,7 @@ body.compact .card {
 
 .drop-tooltip {
   position: absolute;
-  bottom: -32px;
+  top: -44px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.9);
@@ -861,7 +861,7 @@ body.download-step-2 #downloadStage1 {
     text-align: center;
     font-size: 11px;
     padding: 6px 12px;
-    bottom: -30px;
+    top: -40px;
   }
 
   .download-bubble {
