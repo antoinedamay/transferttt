@@ -350,6 +350,7 @@ body.compact .drop-tooltip {
   box-shadow: var(--soft-shadow);
   transition: transform 0.2s, box-shadow 0.2s;
   overflow: visible;
+  transform: translateZ(0);
 }
 
 .dropzone::before,
@@ -361,6 +362,8 @@ body.compact .drop-tooltip {
   border: 2px solid rgba(255, 255, 255, 0.45);
   opacity: 0;
   animation: wave 3s ease-out infinite;
+  will-change: transform, opacity;
+  filter: blur(0.4px);
 }
 
 .dropzone::after {
@@ -697,14 +700,14 @@ body.download-step-2 #downloadStage1 {
   display: grid;
   gap: 6px;
   text-align: right;
-  font-size: 14px;
+  font-size: 18px;
   z-index: 10;
 }
 
 .footer-links a {
-  color: #0a0a0a;
+  color: #000000;
   text-decoration: none;
-  opacity: 0.7;
+  opacity: 1;
   font-weight: 400;
 }
 
@@ -843,7 +846,7 @@ body.download-step-2 #downloadStage1 {
   .footer-links {
     right: 16px;
     bottom: 16px;
-    font-size: 12px;
+    font-size: 14px;
   }
 }
 
@@ -872,14 +875,14 @@ body.download-step-2 #downloadStage1 {
 
 @keyframes wave {
   0% {
-    transform: scale(0.92);
-    opacity: 0.45;
+    transform: scale(0.94);
+    opacity: 0.35;
   }
   70% {
     opacity: 0.12;
   }
   100% {
-    transform: scale(1.12);
+    transform: scale(1.08);
     opacity: 0;
   }
 }

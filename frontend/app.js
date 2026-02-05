@@ -38,6 +38,9 @@ const retryDownloadBtn = document.getElementById("retryDownloadBtn");
 let pendingFile = null;
 let carouselTimer = null;
 let currentDownloadUrl = null;
+let currentProgress = 0;
+let targetProgress = 0;
+let progressAnimId = null;
 
 const API_BASE = window.TRANSFER_API_BASE;
 const MAX_BYTES = 10 * 1024 * 1024 * 1024;
@@ -119,6 +122,12 @@ function resetUI() {
     dropzone.style.setProperty("--progress", "0%");
   }
   if (dropProgress) dropProgress.textContent = "0%";
+  currentProgress = 0;
+  targetProgress = 0;
+  if (progressAnimId) {
+    cancelAnimationFrame(progressAnimId);
+    progressAnimId = null;
+  }
   uploadStatus.textContent = "En attente...";
   expiryNote.textContent = "Le lien reste valide tant que le fichier existe sur Mega.";
   if (downloadView) downloadView.hidden = true;
@@ -264,19 +273,20 @@ function startUpload(file) {
   xhr.open("POST", `${API_BASE}/api/upload`);
   xhr.upload.addEventListener("progress", (event) => {
     if (!event.lengthComputable) return;
-    const pct = Math.round((event.loaded / event.total) * 100);
-    progressBar.style.width = `${pct}%`;
-    if (dropzone) {
-      dropzone.style.setProperty("--progress", `${pct}%`);
+    const pct = Math.min(100, Math.max(0, (event.loaded / event.total) * 100));
+    targetProgress = pct;
+    if (!progressAnimId) {
+      progressAnimId = requestAnimationFrame(animateProgress);
     }
-    if (dropProgress) {
-      dropProgress.textContent = `${pct}%`;
-    }
-    uploadStatus.textContent = `Envoi en cours... ${pct}%`;
+    uploadStatus.textContent = `Envoi en cours... ${Math.round(pct)}%`;
   });
   xhr.addEventListener("load", () => {
     if (xhr.status >= 200 && xhr.status < 300) {
       const data = JSON.parse(xhr.responseText);
+      targetProgress = 100;
+      if (!progressAnimId) {
+        progressAnimId = requestAnimationFrame(animateProgress);
+      }
       uploadStatus.textContent = "Upload terminé";
       document.body.classList.remove("uploading");
       resultBox.hidden = false;
@@ -310,6 +320,28 @@ function startUpload(file) {
   });
 
   xhr.send(formData);
+}
+
+function animateProgress() {
+  const diff = targetProgress - currentProgress;
+  if (Math.abs(diff) < 0.1) {
+    currentProgress = targetProgress;
+  } else {
+    currentProgress += diff * 0.15;
+  }
+  const pct = Math.round(currentProgress);
+  progressBar.style.width = `${pct}%`;
+  if (dropzone) {
+    dropzone.style.setProperty("--progress", `${pct}%`);
+  }
+  if (dropProgress) {
+    dropProgress.textContent = `${pct}%`;
+  }
+  if (Math.abs(targetProgress - currentProgress) < 0.1) {
+    progressAnimId = null;
+  } else {
+    progressAnimId = requestAnimationFrame(animateProgress);
+  }
 }
 
 async function initCarousel() {
