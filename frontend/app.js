@@ -396,7 +396,13 @@ fileInput.addEventListener("change", (event) => {
   prepareFile(event.target.files[0]);
 });
 
-dropzone.addEventListener("click", () => fileInput.click());
+dropzone.addEventListener("click", () => {
+  if (pendingFile && startUploadBtn && !startUploadBtn.disabled) {
+    startUpload(pendingFile);
+    return;
+  }
+  fileInput.click();
+});
 
 dropzone.addEventListener("dragover", (event) => {
   event.preventDefault();

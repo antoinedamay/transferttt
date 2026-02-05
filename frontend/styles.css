@@ -26,7 +26,11 @@
 body {
   margin: 0;
   font-family: "AntoineDisplay", "Outfit", "Space Grotesk", "Poppins", "Avenir Next", sans-serif;
-  background: #f6f2eb;
+  background:
+    radial-gradient(1200px 800px at 10% 20%, rgba(237, 90, 102, 0.25) 0%, transparent 70%),
+    radial-gradient(900px 700px at 80% 20%, rgba(92, 123, 218, 0.25) 0%, transparent 70%),
+    radial-gradient(900px 700px at 45% 85%, rgba(243, 160, 95, 0.25) 0%, transparent 70%),
+    linear-gradient(120deg, #f6e3d6 0%, #f6eadc 35%, #dce5f4 70%, #d6eee8 100%);
   color: var(--text);
   min-height: 100vh;
 }
@@ -38,11 +42,11 @@ body::before {
   background: linear-gradient(120deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 70%, var(--bg-4) 100%);
   background-size: 200% 200%;
   animation: gradientMove 16s ease-in-out infinite;
-  mask-image: url("https://antoinedamay.fr/images/transfert/fond.svg");
+  mask-image: url("assets/fond.svg");
   mask-size: cover;
   mask-position: center;
   mask-repeat: no-repeat;
-  -webkit-mask-image: url("https://antoinedamay.fr/images/transfert/fond.svg");
+  -webkit-mask-image: url("assets/fond.svg");
   -webkit-mask-size: cover;
   -webkit-mask-position: center;
   -webkit-mask-repeat: no-repeat;
