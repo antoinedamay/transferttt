@@ -423,11 +423,18 @@ copyBtn.addEventListener("click", async () => {
   }
 });
 
-function buildEmailBody(meta) {
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildEmailText(meta) {
   const lines = [];
-  lines.push("Bonjour,");
-  lines.push("");
-  lines.push("Voici votre fichier :");
+  lines.push("Votre lien est prêt");
   lines.push(`Nom : ${meta.name}`);
   if (meta.size != null) {
     lines.push(`Poids : ${formatBytes(meta.size)}`);
@@ -436,10 +443,32 @@ function buildEmailBody(meta) {
     const date = new Date(meta.expiresAt);
     lines.push(`Expire le : ${date.toLocaleDateString("fr-FR")}`);
   }
-  lines.push(`Lien de téléchargement : ${meta.downloadUrl}`);
-  lines.push("");
-  lines.push("Bonne journée.");
+  lines.push(`Lien : ${meta.downloadUrl}`);
+  lines.push("Télécharger : " + meta.downloadUrl);
   return lines.join("\\n");
+}
+
+function buildEmailHtml(meta) {
+  const safeName = escapeHtml(meta.name || "Fichier");
+  const safeUrl = escapeHtml(meta.downloadUrl || "");
+  const size = meta.size != null ? formatBytes(meta.size) : "—";
+  const expires = meta.expiresAt
+    ? new Date(meta.expiresAt).toLocaleDateString("fr-FR")
+    : "—";
+  return `
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;border-collapse:separate;border-spacing:0;font-family:'AntoineDisplay','Helvetica Neue',Helvetica,Arial,sans-serif;color:#111;letter-spacing:-0.01em;">
+  <tr>
+    <td style="padding:22px 24px;border:1px solid #e3e3e3;border-radius:18px;background:#f7f7f7;">
+      <div style="font-size:18px;line-height:1.3;margin:0 0 10px 0;">Votre lien est prêt</div>
+      <div style="font-size:14px;line-height:1.5;margin:0 0 6px 0;">Nom&nbsp;: ${safeName}</div>
+      <div style="font-size:14px;line-height:1.5;margin:0 0 6px 0;">Poids&nbsp;: ${escapeHtml(size)}</div>
+      <div style="font-size:14px;line-height:1.5;margin:0 0 12px 0;">Expire le&nbsp;: ${escapeHtml(expires)}</div>
+      <a href="${safeUrl}" style="display:inline-block;padding:10px 18px;border-radius:999px;background:#ff4500;color:#111;text-decoration:none;font-size:14px;line-height:1.2;">Télécharger</a>
+      <div style="font-size:12px;line-height:1.5;margin:12px 0 0 0;color:#444;">Lien&nbsp;: <a href="${safeUrl}" style="color:#111;text-decoration:none;">${safeUrl}</a></div>
+    </td>
+  </tr>
+</table>
+`.trim();
 }
 
 async function copyToClipboard(text) {
@@ -464,14 +493,31 @@ async function copyToClipboard(text) {
   }
 }
 
+async function copyHtmlToClipboard(html, textFallback) {
+  if (navigator.clipboard && window.ClipboardItem) {
+    try {
+      const item = new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([textFallback], { type: "text/plain" }),
+      });
+      await navigator.clipboard.write([item]);
+      return true;
+    } catch (err) {
+      return copyToClipboard(textFallback);
+    }
+  }
+  return copyToClipboard(textFallback);
+}
+
 if (copyEmailBtn) {
   copyEmailBtn.addEventListener("click", async () => {
     if (!lastUploadMeta) {
       showError("Aucun fichier à copier pour l'instant.");
       return;
     }
-    const body = buildEmailBody(lastUploadMeta);
-    const ok = await copyToClipboard(body);
+    const html = buildEmailHtml(lastUploadMeta);
+    const text = buildEmailText(lastUploadMeta);
+    const ok = await copyHtmlToClipboard(html, text);
     if (ok) {
       const original = copyEmailBtn.textContent;
       copyEmailBtn.textContent = "Copié";
