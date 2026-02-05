@@ -145,7 +145,7 @@ body.compact .page {
   color: #1f2430;
   padding: 8px 16px;
   border-radius: 999px;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
 }
@@ -205,7 +205,7 @@ body.compact .card {
 .card-title {
   margin-top: 6px;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .panel {
@@ -249,7 +249,7 @@ body.compact .card {
 }
 
 .options label {
-  font-weight: 600;
+  font-weight: 400;
   color: #1f2430;
 }
 
@@ -277,7 +277,7 @@ body.compact .card {
 
 .slug-help span {
   color: var(--text);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .drop-wrapper {
@@ -289,15 +289,18 @@ body.compact .card {
 .drop-tooltip {
   position: absolute;
   bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.65);
   color: rgba(31, 36, 48, 0.7);
-  font-weight: 500;
+  font-weight: 400;
   padding: 4px 10px;
   border-radius: 999px;
   box-shadow: 0 6px 14px rgba(25, 32, 45, 0.12);
   font-size: 10.5px;
   opacity: 0;
   transition: opacity 0.2s ease;
+  white-space: nowrap;
 }
 
 body.compact .drop-tooltip {
@@ -379,7 +382,7 @@ body.compact .drop-tooltip {
   display: grid;
   place-items: center;
   font-size: 54px;
-  font-weight: 700;
+  font-weight: 400;
   box-shadow: 0 12px 24px rgba(255, 69, 0, 0.35);
   transition: transform 0.2s ease;
 }
@@ -395,7 +398,7 @@ body.compact .drop-tooltip {
   place-items: center;
   color: #ffffff;
   font-size: 32px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: -0.02em;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -419,7 +422,7 @@ body.uploading .drop-icon {
   border: none;
   border-radius: 12px;
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 400;
   padding: 12px 16px;
   cursor: pointer;
   box-shadow: 0 12px 24px rgba(232, 90, 99, 0.25);
@@ -449,7 +452,7 @@ body.uploading .drop-icon {
 }
 
 .file-name {
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .file-size {
@@ -485,7 +488,7 @@ body.uploading .drop-icon {
 }
 
 .result-title {
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 10px;
 }
 
@@ -509,7 +512,7 @@ body.uploading .drop-icon {
   padding: 10px 16px;
   border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 400;
   color: #ffffff;
 }
 
@@ -588,12 +591,12 @@ body.download-step-2 #downloadStage1 {
 }
 
 .bubble-title {
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .bubble-name {
   margin-top: 6px;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .bubble-meta {
@@ -647,13 +650,13 @@ body.download-step-2 #downloadStage1 {
 }
 
 .download-title {
-  font-weight: 700;
+  font-weight: 400;
   font-size: 20px;
 }
 
 .download-name {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .download-size,
@@ -669,7 +672,7 @@ body.download-step-2 #downloadStage1 {
   padding: 12px 16px;
   border-radius: 12px;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 400;
   color: #ffffff;
   box-shadow: 0 12px 24px rgba(232, 90, 99, 0.25);
 }
@@ -692,7 +695,7 @@ body.download-step-2 #downloadStage1 {
   color: #1f2430;
   padding: 10px 14px;
   border-radius: 10px;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   box-shadow: 0 10px 20px rgba(25, 32, 45, 0.08);
 }
@@ -704,7 +707,7 @@ body.download-step-2 #downloadStage1 {
 .error {
   margin-top: 20px;
   color: #c82432;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 @media (max-width: 900px) {
@@ -752,6 +755,12 @@ body.download-step-2 #downloadStage1 {
 
   .result-row {
     flex-direction: column;
+  }
+
+  .drop-tooltip {
+    white-space: normal;
+    max-width: calc(100vw - 60px);
+    text-align: center;
   }
 }
 
