@@ -35,8 +35,19 @@ body::before {
   content: "";
   position: fixed;
   inset: -12%;
-  background: var(--bg-1);
-  animation: waveColor 20s ease-in-out infinite;
+  background: linear-gradient(
+    120deg,
+    #ff3b30 0%,
+    #ff3b30 18%,
+    #ff8f1f 30%,
+    #ff8f1f 48%,
+    #16e0bd 62%,
+    #16e0bd 78%,
+    #3f6fff 92%,
+    #3f6fff 100%
+  );
+  background-size: 320% 320%;
+  animation: waveShift 14s linear infinite;
   mask-image: url("assets/fond.svg");
   mask-size: cover;
   mask-position: center;
@@ -80,6 +91,17 @@ body.centered #uploadView .panel {
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+body.centered #uploadView .panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.1));
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 body.centered #uploadView .panel-left,
@@ -624,6 +646,17 @@ body.download-step-2 #downloadStage1 {
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   display: grid;
   gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.download-left::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.08));
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .download-right {
@@ -642,6 +675,16 @@ body.download-step-2 #downloadStage1 {
   border: 1px solid rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
+  position: relative;
+}
+
+.carousel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.05));
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .carousel-slide {
@@ -789,13 +832,10 @@ body.download-step-2 #downloadStage1 {
   100% { background-position: 0% 30%; }
 }
 
-@keyframes waveColor {
-  0% { background-color: #ff3b30; }
-  18% { background-color: #ff8f1f; }
-  35% { background-color: #16e0bd; }
-  58% { background-color: #3f6fff; }
-  77% { background-color: #ff3b30; }
-  100% { background-color: #ff8f1f; }
+@keyframes waveShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 @keyframes wave {
