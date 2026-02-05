@@ -26,11 +26,7 @@
 body {
   margin: 0;
   font-family: "AntoineDisplay", "Outfit", "Space Grotesk", "Poppins", "Avenir Next", sans-serif;
-  background:
-    radial-gradient(1200px 800px at 10% 20%, rgba(255, 59, 48, 0.28) 0%, transparent 70%),
-    radial-gradient(900px 700px at 80% 20%, rgba(63, 111, 255, 0.28) 0%, transparent 70%),
-    radial-gradient(900px 700px at 45% 85%, rgba(22, 224, 189, 0.28) 0%, transparent 70%),
-    rgb(231, 231, 231);
+  background: rgb(231, 231, 231);
   color: var(--text);
   min-height: 100vh;
 }
@@ -41,7 +37,7 @@ body::before {
   inset: -12%;
   background: linear-gradient(120deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 70%, var(--bg-4) 100%);
   background-size: 200% 200%;
-  animation: gradientMove 18s steps(6, end) infinite;
+  animation: gradientMove 18s ease-in-out infinite;
   mask-image: url("assets/fond.svg");
   mask-size: cover;
   mask-position: center;
@@ -772,10 +768,7 @@ body.download-step-2 #downloadStage1 {
 
 @keyframes gradientMove {
   0% { background-position: 0% 30%; }
-  20% { background-position: 40% 20%; }
-  40% { background-position: 80% 50%; }
-  60% { background-position: 60% 80%; }
-  80% { background-position: 20% 60%; }
+  50% { background-position: 100% 70%; }
   100% { background-position: 0% 30%; }
 }
 
