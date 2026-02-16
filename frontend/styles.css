@@ -2,7 +2,12 @@
 
 @font-face {
   font-family: "AntoineDisplay";
-  src: url("https://antoinedamay.fr/type/HelveticaLTStd-Bold.otf") format("opentype");
+  src:
+    local("Helvetica LT Std Bold"),
+    local("HelveticaLTStd-Bold"),
+    url("assets/fonts/HelveticaLTStd-Bold.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
   font-display: swap;
 }
 
@@ -26,6 +31,7 @@
 body {
   margin: 0;
   font-family: "AntoineDisplay", "Outfit", "Space Grotesk", "Poppins", "Avenir Next", sans-serif;
+  font-synthesis: none;
   background: rgb(231, 231, 231);
   color: var(--text);
   min-height: 100vh;
